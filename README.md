@@ -139,7 +139,7 @@ week is devoted to planning and designing the roadmap for networking the game. B
 * What happens when the network latency turns out to be prohibitively slow?
 * How will I test the game if it requires networked computers?
 
-####Netoworking III (week 7) ####
+####Networking III (week 7) ####
 This week is dedicated to implementing last week's network specifications. Specifically, by the end of this week:
 * Computers must be able to communicate with each other under a sound protocol.
 * The game state must be serializable.
@@ -167,14 +167,14 @@ Worst-comes-to-worst, I'll just focus on making the fireball. Its the balance be
   * maybe we can limit the number of players on the network, while still having a networked game just with two computers only.
   * Kinda peer-to-peer ish. That way we won't need a single computer to have to handle 6 seperate views...
 
-####Finalization (Week 8)####
+####Finalization (Week 9)####
 Home stretch! This is the time for polishing the game's functionality, clearing bugs and finishing TODOs.
 * Texture the models and build a generic gymnasium as the envrionment.
 * Players should be articulated and have some form of movement/texture. They should have colors too.
 * The HUD should look presentable. The mouse should be hidden from view and constrained to the window.
 * Basic keybidnings for quitting the game should be implemented.
 
-####ROLLOUT! (Week 9)####
+####ROLLOUT! (Week 10)####
 Further development is now frozen and all effort goes towards fixing bugs and testing the corner cases. Further cleaning and 
 refining of the code and user interface is good, but no new features should be pursued. Possibly employ some "beta testers" to help
 check the game?
