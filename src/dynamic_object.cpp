@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "dynamic_object.h"
 
 #define FREE(ptr) if (ptr) { delete ptr; }
@@ -12,7 +14,7 @@ DynamicObject::DynamicObject() {
 }
 
 DynamicObject::~DynamicObject() {
-    FREE(m_sceneNode)
+    m_sceneNode->drop();
     FREE(m_rigidBody)
     FREE(m_motionState)
     FREE(m_collisionShape)

@@ -18,6 +18,9 @@ int main(int argc, char **argv) {
     /* Enter the main simulation loop. */
     engine.run();
 
+    /* Once we're done... */
+    //engine.clearScene();
+
     std::cout << "Bye bye!" << std::endl;
 
     return 0;
