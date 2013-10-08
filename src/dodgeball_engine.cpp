@@ -113,13 +113,19 @@ void DodgeballEngine::clearScene() {
     std::cout << "Clearing scene..." << std::endl;
     for (unsigned int i = 0; i < m_dodgeballs.size(); i++)
         FREE(m_dodgeballs[i])
-
+    
+    std::cout << "Freeing environmental elements." << std::endl;
     FREE(m_floor)
     FREE(m_nWall)
     FREE(m_sWall)
     FREE(m_eWall)
     FREE(m_wWall)
     FREE(m_ceiling)
+    std::cout << "Done clearing scene." << std::endl;
+}
+
+void DodgeballEngine::gracefullyStopIrrlicht() {
+    m_device->drop();
 }
 
 void DodgeballEngine::run() {
@@ -193,11 +199,8 @@ DodgeballEngine::~DodgeballEngine() {
     /* Bye bye Bullet! */
     FREE(m_dynamicsWorld)
     FREE(m_solver)
-    FREE(m_broadphase)
-    FREE(m_collisionConfig)
     FREE(m_dispatcher)
-
-    /* bye bye irrlicht */
-    m_device->drop();
+    FREE(m_collisionConfig)
+    FREE(m_broadphase)
 }
 

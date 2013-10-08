@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
     /* Enter the main simulation loop. */
     engine.run();
     engine.clearScene();
+    engine.gracefullyStopIrrlicht();
 
     std::cout << "Bye bye!" << std::endl;
 
