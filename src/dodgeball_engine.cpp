@@ -124,10 +124,6 @@ void DodgeballEngine::clearScene() {
     std::cout << "Done clearing scene." << std::endl;
 }
 
-void DodgeballEngine::gracefullyStopIrrlicht() {
-    m_device->drop();
-}
-
 void DodgeballEngine::run() {
     double prevTime = m_timer->getTime();
 
@@ -202,5 +198,8 @@ DodgeballEngine::~DodgeballEngine() {
     FREE(m_dispatcher)
     FREE(m_collisionConfig)
     FREE(m_broadphase)
+
+    /* Bye bye irrlicht */
+    m_device->drop();
 }
 

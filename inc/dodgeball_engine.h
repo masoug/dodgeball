@@ -26,7 +26,6 @@ class DodgeballEngine : public irr::IEventReceiver {
         void setupScene();
         void buildCourt();
         void clearScene();
-        void gracefullyStopIrrlicht();
         void run();
         void updatePhysics(double timestep);
 
