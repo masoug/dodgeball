@@ -54,6 +54,7 @@ DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
         m_dispatcher, m_broadphase, m_solver, m_collisionConfig);
     m_dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
 
+    setState(INIT_STATE);
 }
 
 DodgeballNode* DodgeballEngine::addDodgeball(btVector3 pos) {
@@ -155,6 +156,7 @@ void DodgeballEngine::clearScene() {
 }
 
 void DodgeballEngine::run() {
+    setState(DGBENG_RUNNING);
     double prevTime = m_timer->getTime();
 
     /* TODO: Maybe consider putting this loop at the top main()-level ? */

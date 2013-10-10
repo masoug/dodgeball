@@ -14,11 +14,12 @@
 #include <btBulletDynamicsCommon.h>
 
 #include "dynamic_object.h"
+#include "state_machine.h"
 
 irr::core::vector3df RodriguesRotate(
     irr::core::vector3df input, irr::core::vector3df axis, double rad);
 
-class DodgeballEngine : public irr::IEventReceiver {
+class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
     public:
         DodgeballEngine(unsigned int width, unsigned int height);
         ~DodgeballEngine();
