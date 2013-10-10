@@ -1,5 +1,6 @@
 #Dodgeball#
 ##3D Dodgeball Game##
+####NOTE: Check the wiki for the latest up-to-date information. This readme will only be updated when there is a major release.####
 In dodgeball there are two teams of six players on opposing sides of 10x10 m court. For the sake of simplicity, this game will 
 not include all the rules and regulations of dodgeball as laid out [here](http://www.thendl.com/thendl-dodgeball-101.asp)
 (such as substitutes or "The Rush"). Ultimately, this game will allow the users to:
