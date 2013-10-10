@@ -63,6 +63,8 @@ class DodgeballEngine : public irr::IEventReceiver {
         DodgeballNode* addDodgeball(btVector3 pos);
         void fireDodgeball();
         void trackCamera(int x, int y);
+        void handleCollisions();
+        DodgeballNode* getDodgeball(btRigidBody *body) const;
         std::vector<DodgeballNode* >        m_dodgeballs;
 };
 

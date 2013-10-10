@@ -75,6 +75,35 @@ void DodgeballEngine::fireDodgeball() {
     ball->throwBall(btVector3(imp.X, imp.Y, imp.Z));
 }
 
+void DodgeballEngine::handleCollisions() {
+    /* Handle them contact manifolds */
+    int numManifolds = m_dynamicsWorld->getDispatcher()->getNumManifolds();
+    for (int i = 0; i < numManifolds; i++) {
+        btPersistentManifold *contactManifold = 
+            m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+        btRigidBody *bodyA = (btRigidBody*)(contactManifold->getBody0());
+        btRigidBody *bodyB = (btRigidBody*)(contactManifold->getBody1());
+
+        DodgeballNode *ball = getDodgeball(bodyA);
+        if (ball && (bodyB == m_floor->getRigidBody()))
+            ball->onCollision();
+        else {
+            ball = getDodgeball(bodyB);
+            if (ball && (bodyA == m_floor->getRigidBody()))
+                ball->onCollision();
+        }
+    }
+}
+
+DodgeballNode* DodgeballEngine::getDodgeball(btRigidBody *body) const {
+    for (unsigned int i = 0; i < m_dodgeballs.size(); i++) {
+        if (body == m_dodgeballs[i]->getRigidBody()) {
+            return m_dodgeballs[i];
+        }
+    }
+    return NULL;
+}
+
 void DodgeballEngine::setupScene() {
     /* Shift the camera back */
     m_camera->setPosition(irr::core::vector3df(0.0, 1.711, 4.0));
@@ -153,6 +182,9 @@ void DodgeballEngine::updatePhysics(double timestep) {
     /* apply to models */
     for (unsigned int i = 0; i < m_dodgeballs.size(); i++)
         m_dodgeballs[i]->applyTransform();
+
+    /* Handle the collisions */
+    handleCollisions();
 }
 
 bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
