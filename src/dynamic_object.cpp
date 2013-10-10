@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "dynamic_object.h"
 
 #define FREE(ptr) if (ptr) { delete ptr; }
@@ -9,10 +11,12 @@
 DynamicObject::DynamicObject() {
     m_sceneNode = NULL;
     m_rigidBody = NULL;
+
+    setState(INIT_STATE);
 }
 
 DynamicObject::~DynamicObject() {
-    FREE(m_sceneNode)
+    m_sceneNode->drop();
     FREE(m_rigidBody)
     FREE(m_motionState)
     FREE(m_collisionShape)
@@ -39,7 +43,15 @@ void DynamicObject::applyTransform() {
         quat.getZ(),
         quat.getW());
     iquat.toEuler(euler);
-    m_sceneNode->setRotation(euler *  irr::core::RADTODEG);
+    m_sceneNode->setRotation(euler * irr::core::RADTODEG);
+}
+
+void DynamicObject::onCollision() {
+    /* Handle collisions */
+}
+
+btRigidBody* DynamicObject::getRigidBody() const {
+    return m_rigidBody;
 }
 
 DodgeballNode::DodgeballNode(
@@ -48,9 +60,10 @@ DodgeballNode::DodgeballNode(
     btVector3 initPos) :
     DynamicObject()
 {
-    /* TODO: set to fault state */
-    if (!device)
+    if (!device) {
+        setState(FATAL_STATE);
         return;
+    }
     
     irr::scene::ISceneManager *smgr = device->getSceneManager();
     irr::video::IVideoDriver *driver = device->getVideoDriver();
@@ -74,14 +87,23 @@ DodgeballNode::DodgeballNode(
     m_rigidBody->setDamping(0.2, 0.2);
 
     world->addRigidBody(m_rigidBody);
+    
+    setState(INIT_STATE);
 }
 
 DodgeballNode::~DodgeballNode() {
     /* dtor */
 }
 
+void DodgeballNode::onCollision() {
+    if (getState() == DGDBL_ACTIVE)
+        std::cout << "COLLISION!!!" << std::endl;
+    setState(DGDBL_INACTIVE);
+}
+
 void DodgeballNode::throwBall(btVector3 impulse) {
     m_rigidBody->applyCentralImpulse(impulse);
+    setState(DGDBL_ACTIVE);
 }
 
 WallNode::WallNode(
@@ -91,9 +113,10 @@ WallNode::WallNode(
     irr::core::vector3df scale) :
     DynamicObject()
 {
-    /* TODO: set to fault state */
-    if (!device)
+    if (!device) {
+        setState(FATAL_STATE);
         return;
+    }
     
     irr::scene::ISceneManager *smgr = device->getSceneManager();
     irr::video::IVideoDriver *driver = device->getVideoDriver();
@@ -119,6 +142,8 @@ WallNode::WallNode(
 
     world->addRigidBody(m_rigidBody);
     applyTransform();
+
+    setState(INIT_STATE);
 }
 
 WallNode::~WallNode() {

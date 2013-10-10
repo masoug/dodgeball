@@ -19,7 +19,7 @@ irr::core::vector3df RodriguesRotate(
 }
 
 DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
-    m_windowWidth(width), m_windowHeight(height)
+    m_quit(false), m_windowWidth(width), m_windowHeight(height)
 {
     /* Initialize Irrlicht! */
     /* TODO: if the prototype is greenlit, then add more options to the 
@@ -40,6 +40,7 @@ DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
     /* TODO: Sometime in the future make a better FPS camera */
     m_camera = m_scenemgr->addCameraSceneNodeFPS(0, 100, 0.001);
     m_timer = m_device->getTimer();
+    m_cursorCtrl = m_device->getCursorControl();
 
     //m_device->getCursorControl()->setVisible(false);
     m_device->setWindowCaption(L"Dodgeball - PROTOTYPE");
@@ -73,6 +74,35 @@ void DodgeballEngine::fireDodgeball() {
     /* create ball and throw it */
     DodgeballNode *ball = addDodgeball(btVector3(pos.X, pos.Y, pos.Z));
     ball->throwBall(btVector3(imp.X, imp.Y, imp.Z));
+}
+
+void DodgeballEngine::handleCollisions() {
+    /* Handle them contact manifolds */
+    int numManifolds = m_dynamicsWorld->getDispatcher()->getNumManifolds();
+    for (int i = 0; i < numManifolds; i++) {
+        btPersistentManifold *contactManifold = 
+            m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+        btRigidBody *bodyA = (btRigidBody*)(contactManifold->getBody0());
+        btRigidBody *bodyB = (btRigidBody*)(contactManifold->getBody1());
+
+        DodgeballNode *ball = getDodgeball(bodyA);
+        if (ball && (bodyB == m_floor->getRigidBody()))
+            ball->onCollision();
+        else {
+            ball = getDodgeball(bodyB);
+            if (ball && (bodyA == m_floor->getRigidBody()))
+                ball->onCollision();
+        }
+    }
+}
+
+DodgeballNode* DodgeballEngine::getDodgeball(btRigidBody *body) const {
+    for (unsigned int i = 0; i < m_dodgeballs.size(); i++) {
+        if (body == m_dodgeballs[i]->getRigidBody()) {
+            return m_dodgeballs[i];
+        }
+    }
+    return NULL;
 }
 
 void DodgeballEngine::setupScene() {
@@ -113,13 +143,15 @@ void DodgeballEngine::clearScene() {
     std::cout << "Clearing scene..." << std::endl;
     for (unsigned int i = 0; i < m_dodgeballs.size(); i++)
         FREE(m_dodgeballs[i])
-
+    
+    std::cout << "Freeing environmental elements." << std::endl;
     FREE(m_floor)
     FREE(m_nWall)
     FREE(m_sWall)
     FREE(m_eWall)
     FREE(m_wWall)
     FREE(m_ceiling)
+    std::cout << "Done clearing scene." << std::endl;
 }
 
 void DodgeballEngine::run() {
@@ -128,7 +160,7 @@ void DodgeballEngine::run() {
     /* TODO: Maybe consider putting this loop at the top main()-level ? */
     /* doing so would enforce the "statefulness" of the engine? Also a
      * better coding practice? */
-    while(m_device->run() && m_driver) {
+    while(m_device->run() && m_driver && !m_quit) {
         if (m_device->isWindowActive()) {
             /* update physics stuff */
             updatePhysics((m_timer->getTime()-prevTime) * 0.001);
@@ -151,6 +183,21 @@ void DodgeballEngine::updatePhysics(double timestep) {
     /* apply to models */
     for (unsigned int i = 0; i < m_dodgeballs.size(); i++)
         m_dodgeballs[i]->applyTransform();
+
+    /* Handle the collisions */
+    handleCollisions();
+}
+
+void DodgeballEngine::moveMe(double dx, double dy, double dz) {
+    /* Move me!
+     * We have to be careful here, since we exist in both Bullet's and Irrlicht's world,
+     * we need to make sure that we move both the bullet rigidbody and the scenenode.
+     */
+    irr::core::vector3df camLoc = m_camera->getAbsolutePosition();
+    camLoc.X += dx;
+    camLoc.Y += dy;
+    camLoc.Z += dz;
+    m_camera->setPosition(camLoc);
 }
 
 bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
@@ -169,6 +216,32 @@ bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
             break;
         }
         return true;
+    } else if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
+        if (event.KeyInput.PressedDown) {
+            /* do the yucky case statements! */
+            switch (event.KeyInput.Key) {
+                case irr::KEY_KEY_W:
+                    moveMe(0.0, 0.0, -0.5);
+                    break;
+                case irr::KEY_KEY_A:
+                    moveMe(0.5, 0.0, 0.0);
+                    break;
+                case irr::KEY_KEY_S:
+                    moveMe(0.0, 0.0, 0.5);
+                    break;
+                case irr::KEY_KEY_D:
+                    moveMe(-0.5, 0.0, 0.0);
+                    break;
+                case irr::KEY_KEY_Q:
+                    m_quit = true;
+                    break;
+                case irr::KEY_ESCAPE:
+                    m_quit = true;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
     return false;
 }
@@ -186,6 +259,15 @@ void DodgeballEngine::trackCamera(int x, int y) {
     irr::core::vector3df target = RodriguesRotate(
         forward, right.normalize(), -yproportion*M_PI/2.0);
     m_camera->setTarget(m_camera->getPosition() + target);
+
+    /* Prevent the user from mousing off the screen... */
+    //irr::f32 newX = 1.0 * x / m_windowWidth;
+    //irr::f32 newY = 1.0 * y / m_windowHeight;
+    //if (newX >= 0.99)
+    //    newX = 0.99;
+    //else if (newX <= 0.01)
+    //    newX = 0.01;
+    //m_cursorCtrl->setPosition(newX, newY);
 }
 
 DodgeballEngine::~DodgeballEngine() {
@@ -193,11 +275,11 @@ DodgeballEngine::~DodgeballEngine() {
     /* Bye bye Bullet! */
     FREE(m_dynamicsWorld)
     FREE(m_solver)
-    FREE(m_broadphase)
-    FREE(m_collisionConfig)
     FREE(m_dispatcher)
+    FREE(m_collisionConfig)
+    FREE(m_broadphase)
 
-    /* bye bye irrlicht */
+    /* Bye bye irrlicht */
     m_device->drop();
 }
 

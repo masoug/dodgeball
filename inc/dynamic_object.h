@@ -10,14 +10,17 @@
 #include <irrlicht.h>
 #include <btBulletDynamicsCommon.h>
 
-class DynamicObject {
+#include "state_machine.h"
+
+class DynamicObject : public StateMachineBase {
     public:
         DynamicObject();
         virtual ~DynamicObject();
 
-        void applyTransform();
+        virtual void applyTransform();
+        virtual void onCollision();
         //irr::scene::ISceneNode* getSceneNode() const;
-        //btRigidBody* getRigidBody() const;
+        btRigidBody* getRigidBody() const;
 
     protected:
         irr::scene::ISceneNode  *m_sceneNode;
@@ -33,6 +36,8 @@ class DodgeballNode : public DynamicObject {
             btDiscreteDynamicsWorld *world,
             btVector3 initPos);
         virtual ~DodgeballNode();
+
+        virtual void onCollision();
 
         void throwBall(btVector3 impulse);
 };

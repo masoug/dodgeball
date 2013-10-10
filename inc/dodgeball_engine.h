@@ -28,41 +28,48 @@ class DodgeballEngine : public irr::IEventReceiver {
         void clearScene();
         void run();
         void updatePhysics(double timestep);
+        void moveMe(double dx, double dy, double dz);
 
         /* Event handling */
         virtual bool OnEvent(const irr::SEvent& event);
 
     private:
+        /* Administrative stuff */
+        bool m_quit;
+
         /* window dimensions */
         unsigned int    m_windowWidth;
         unsigned int    m_windowHeight;
 
         /* Scene elements */
-        WallNode    *m_floor;
-        WallNode    *m_nWall;
-        WallNode    *m_sWall;
-        WallNode    *m_eWall;
-        WallNode    *m_wWall;
-        WallNode    *m_ceiling;
+        WallNode    *m_floor = NULL;
+        WallNode    *m_nWall = NULL;
+        WallNode    *m_sWall = NULL;
+        WallNode    *m_eWall = NULL;
+        WallNode    *m_wWall = NULL;
+        WallNode    *m_ceiling = NULL;
 
         /* Irrlicht stuph... */
-        irr::IrrlichtDevice             *m_device;
-        irr::video::IVideoDriver        *m_driver;
-        irr::scene::ISceneManager       *m_scenemgr;
-        irr::scene::ICameraSceneNode    *m_camera;
-        irr::ITimer                     *m_timer;
+        irr::IrrlichtDevice             *m_device       = NULL;
+        irr::video::IVideoDriver        *m_driver       = NULL;
+        irr::scene::ISceneManager       *m_scenemgr     = NULL;
+        irr::scene::ICameraSceneNode    *m_camera       = NULL;
+        irr::ITimer                     *m_timer        = NULL;
+        irr::gui::ICursorControl        *m_cursorCtrl   = NULL;
 
         /* Bullet stuph... */
-        btBroadphaseInterface               *m_broadphase;
-        btDefaultCollisionConfiguration     *m_collisionConfig;
-        btCollisionDispatcher               *m_dispatcher;
-        btSequentialImpulseConstraintSolver *m_solver;
-        btDiscreteDynamicsWorld             *m_dynamicsWorld;
+        btBroadphaseInterface               *m_broadphase       = NULL;
+        btDefaultCollisionConfiguration     *m_collisionConfig  = NULL;
+        btCollisionDispatcher               *m_dispatcher       = NULL;
+        btSequentialImpulseConstraintSolver *m_solver           = NULL;
+        btDiscreteDynamicsWorld             *m_dynamicsWorld    = NULL;
 
         /* Scene elements */
         DodgeballNode* addDodgeball(btVector3 pos);
         void fireDodgeball();
         void trackCamera(int x, int y);
+        void handleCollisions();
+        DodgeballNode* getDodgeball(btRigidBody *body) const;
         std::vector<DodgeballNode* >        m_dodgeballs;
 };
 
