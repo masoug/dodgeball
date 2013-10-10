@@ -28,11 +28,15 @@ class DodgeballEngine : public irr::IEventReceiver {
         void clearScene();
         void run();
         void updatePhysics(double timestep);
+        void moveMe(double dx, double dy, double dz);
 
         /* Event handling */
         virtual bool OnEvent(const irr::SEvent& event);
 
     private:
+        /* Administrative stuff */
+        bool m_quit;
+
         /* window dimensions */
         unsigned int    m_windowWidth;
         unsigned int    m_windowHeight;
@@ -46,18 +50,19 @@ class DodgeballEngine : public irr::IEventReceiver {
         WallNode    *m_ceiling = NULL;
 
         /* Irrlicht stuph... */
-        irr::IrrlichtDevice             *m_device = NULL;
-        irr::video::IVideoDriver        *m_driver = NULL;
-        irr::scene::ISceneManager       *m_scenemgr = NULL;
-        irr::scene::ICameraSceneNode    *m_camera = NULL;
-        irr::ITimer                     *m_timer = NULL;
+        irr::IrrlichtDevice             *m_device       = NULL;
+        irr::video::IVideoDriver        *m_driver       = NULL;
+        irr::scene::ISceneManager       *m_scenemgr     = NULL;
+        irr::scene::ICameraSceneNode    *m_camera       = NULL;
+        irr::ITimer                     *m_timer        = NULL;
+        irr::gui::ICursorControl        *m_cursorCtrl   = NULL;
 
         /* Bullet stuph... */
-        btBroadphaseInterface               *m_broadphase = NULL;
-        btDefaultCollisionConfiguration     *m_collisionConfig = NULL;
-        btCollisionDispatcher               *m_dispatcher = NULL;
-        btSequentialImpulseConstraintSolver *m_solver = NULL;
-        btDiscreteDynamicsWorld             *m_dynamicsWorld = NULL;
+        btBroadphaseInterface               *m_broadphase       = NULL;
+        btDefaultCollisionConfiguration     *m_collisionConfig  = NULL;
+        btCollisionDispatcher               *m_dispatcher       = NULL;
+        btSequentialImpulseConstraintSolver *m_solver           = NULL;
+        btDiscreteDynamicsWorld             *m_dynamicsWorld    = NULL;
 
         /* Scene elements */
         DodgeballNode* addDodgeball(btVector3 pos);
