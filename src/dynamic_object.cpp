@@ -9,9 +9,6 @@
 #define DODGEBALL_MASS      0.680389
 
 DynamicObject::DynamicObject() {
-    m_sceneNode = NULL;
-    m_rigidBody = NULL;
-
     setState(INIT_STATE);
 }
 
@@ -87,8 +84,6 @@ DodgeballNode::DodgeballNode(
     m_rigidBody->setDamping(0.2, 0.2);
 
     world->addRigidBody(m_rigidBody);
-    
-    setState(INIT_STATE);
 }
 
 DodgeballNode::~DodgeballNode() {
@@ -142,11 +137,70 @@ WallNode::WallNode(
 
     world->addRigidBody(m_rigidBody);
     applyTransform();
-
-    setState(INIT_STATE);
 }
 
 WallNode::~WallNode() {
+    /* dtor */
+}
+
+AvatarNode::AvatarNode(
+    irr::IrrlichtDevice *device,
+    btDiscreteDynamicsWorld *world,
+    btVector3 initPos,
+    irr::core::vector3df scale,
+    AvatarType type)
+{
+    m_avatarType = type;
+
+    if (!device) {
+        setState(FATAL_STATE);
+        return;
+    }
+
+    irr::scene::ISceneManager *smgr = device->getSceneManager();
+    irr::video::IVideoDriver *driver = device->getVideoDriver();
+
+    /* Load the model file. */
+    loadModel();
+
+    btTransform transform;
+    transform.setIdentity();
+    transform.setOrigin(initPos);
+
+    m_motionState = new btDefaultMotionState(transform);
+    /* I think the collision shape should be cylinder? */
+    /* Generate the rigidbody and localinertial... */
+    btVector3 locInertia;
+    m_collisionShape->calculateLocalInertia(0.0, locInertia);
+    m_rigidBody = new btRigidBody(
+        0.0, m_motionState, m_collisionShape, locInertia);
+    m_rigidBody->setRestitution(0.75);
+
+    world->addRigidBody(m_rigidBody);
+    applyTransform();
+}
+
+void AvatarNode::loadModel() {
+    /* CASE STATEMENTS!!! */
+    switch (m_avatarType) {
+        case HOTDOG:
+            break;
+        case ICE_CREAM:
+            break;
+        case BANANA:
+            break;
+        case PHIL:
+            break;
+        case BLACKHAT:
+            break;
+        case SNOWMAN:
+            break;
+        default:
+            break;
+    }
+}
+
+AvatarNode::~AvatarNode() {
     /* dtor */
 }
 

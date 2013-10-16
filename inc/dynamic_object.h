@@ -23,10 +23,10 @@ class DynamicObject : public StateMachineBase {
         btRigidBody* getRigidBody() const;
 
     protected:
-        irr::scene::ISceneNode  *m_sceneNode;
-        btRigidBody             *m_rigidBody;
-        btMotionState           *m_motionState;
-        btCollisionShape        *m_collisionShape;
+        irr::scene::ISceneNode  *m_sceneNode        = NULL;
+        btRigidBody             *m_rigidBody        = NULL;
+        btMotionState           *m_motionState      = NULL;
+        btCollisionShape        *m_collisionShape   = NULL;
 };
 
 class DodgeballNode : public DynamicObject {
@@ -50,6 +50,31 @@ class WallNode : public DynamicObject {
             btVector3 initPos,
             irr::core::vector3df scale);
         virtual ~WallNode();
+};
+
+class AvatarNode : public DynamicObject {
+    public:
+        enum AvatarType {
+            NULL_AVATAR,
+            HOTDOG,
+            ICE_CREAM,
+            BANANA,
+            PHIL,
+            BLACKHAT,
+            SNOWMAN
+        };
+
+        AvatarNode(
+            irr::IrrlichtDevice *device,
+            btDiscreteDynamicsWorld *world,
+            btVector3 initPos,
+            irr::core::vector3df scale,
+            AvatarType type);
+        virtual ~AvatarNode();
+
+    private:
+        void loadModel();
+        AvatarType  m_avatarType;
 };
 
 #endif
