@@ -7,6 +7,8 @@
 /* All units metric, mass in kg */
 #define DODGEBALL_RADIUS    0.1524
 #define DODGEBALL_MASS      0.680389
+#define HUMAN_RADIUS        0.2286
+#define HUMAN_HEIGHT        1.711
 
 DynamicObject::DynamicObject() {
     setState(INIT_STATE);
@@ -147,7 +149,6 @@ AvatarNode::AvatarNode(
     irr::IrrlichtDevice *device,
     btDiscreteDynamicsWorld *world,
     btVector3 initPos,
-    irr::core::vector3df scale,
     AvatarType type)
 {
     m_avatarType = type;
@@ -156,20 +157,30 @@ AvatarNode::AvatarNode(
         setState(FATAL_STATE);
         return;
     }
-
+    
     irr::scene::ISceneManager *smgr = device->getSceneManager();
-    irr::video::IVideoDriver *driver = device->getVideoDriver();
+    //irr::video::IVideoDriver *driver = device->getVideoDriver();
 
     /* Load the model file. */
-    loadModel();
+    loadModel(smgr);
+    m_sceneNode = smgr->addAnimatedMeshSceneNode(m_animatedMesh);
+    m_sceneNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+    
+    /* Setting scale; this is tricky... */
+    irr::core::vector3df ext = m_sceneNode->getTransformedBoundingBox().getExtent();
+    m_sceneNode->setScale(irr::core::vector3df(
+        (2.0*HUMAN_RADIUS)/ext.X,
+        HUMAN_HEIGHT/ext.Y,
+        (2.0*HUMAN_RADIUS)/ext.Z));
 
     btTransform transform;
     transform.setIdentity();
     transform.setOrigin(initPos);
 
     m_motionState = new btDefaultMotionState(transform);
-    /* I think the collision shape should be cylinder? */
-    /* Generate the rigidbody and localinertial... */
+    m_collisionShape = new btCapsuleShape(HUMAN_RADIUS, HUMAN_HEIGHT);
+
+    /* Generate the rigidbody and local inertia... */
     btVector3 locInertia;
     m_collisionShape->calculateLocalInertia(0.0, locInertia);
     m_rigidBody = new btRigidBody(
@@ -178,18 +189,32 @@ AvatarNode::AvatarNode(
 
     world->addRigidBody(m_rigidBody);
     applyTransform();
+    
+    /* Simple hack to get things working for now...
+     * There will need to be a way to determine which side
+     * who is on so the mirroring works correctly.
+     */
+    m_sceneNode->setRotation(
+        irr::core::vector3df(0.0, 180.0, 0.0));
 }
 
-void AvatarNode::loadModel() {
+void AvatarNode::loadModel(
+    irr::scene::ISceneManager *smgr) {
     /* CASE STATEMENTS!!! */
     switch (m_avatarType) {
         case HOTDOG:
+            m_animatedMesh = smgr->getMesh(
+                "models/players/hotdog/hotdog.b3d");
             break;
-        case ICE_CREAM:
+        case POPSICLE:
             break;
         case BANANA:
+            m_animatedMesh = smgr->getMesh(
+                "models/players/banana/banana.b3d");
             break;
         case PHIL:
+            m_animatedMesh = smgr->getMesh(
+                "models/players/phil/phil.b3d");
             break;
         case BLACKHAT:
             break;
@@ -202,5 +227,7 @@ void AvatarNode::loadModel() {
 
 AvatarNode::~AvatarNode() {
     /* dtor */
+    std::cout << "DROP PLAYA" << std::endl;
+    m_animatedMesh->drop();
 }
 

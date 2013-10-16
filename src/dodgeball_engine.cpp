@@ -77,6 +77,18 @@ void DodgeballEngine::fireDodgeball() {
     ball->throwBall(btVector3(imp.X, imp.Y, imp.Z));
 }
 
+void DodgeballEngine::loadPlayers() {
+    m_phil = new AvatarNode(
+        m_device, m_dynamicsWorld, 
+        btVector3(2.5, 0.35, -2.5), AvatarNode::PHIL);
+   m_hotdog = new AvatarNode(
+        m_device, m_dynamicsWorld, 
+        btVector3(0.0, 0.35, -2.5), AvatarNode::HOTDOG);
+   m_banana = new AvatarNode(
+        m_device, m_dynamicsWorld, 
+        btVector3(-2.5, 0.35, -2.5), AvatarNode::BANANA);
+}
+
 void DodgeballEngine::handleCollisions() {
     /* Handle them contact manifolds */
     int numManifolds = m_dynamicsWorld->getDispatcher()->getNumManifolds();
@@ -113,8 +125,9 @@ void DodgeballEngine::setupScene() {
     m_camera->setTarget(irr::core::vector3df(0.0, 0.0, 0.0));
     m_camera->setUpVector(irr::core::vector3df(0.0, 1.0, 0.0));
     
-    /* Build the court */
+    /* Build the court and add players */
     buildCourt();
+    loadPlayers();
 
     /* setup input systems */
     m_device->setEventReceiver(this);

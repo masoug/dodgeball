@@ -57,7 +57,7 @@ class AvatarNode : public DynamicObject {
         enum AvatarType {
             NULL_AVATAR,
             HOTDOG,
-            ICE_CREAM,
+            POPSICLE,
             BANANA,
             PHIL,
             BLACKHAT,
@@ -68,13 +68,14 @@ class AvatarNode : public DynamicObject {
             irr::IrrlichtDevice *device,
             btDiscreteDynamicsWorld *world,
             btVector3 initPos,
-            irr::core::vector3df scale,
             AvatarType type);
         virtual ~AvatarNode();
 
     private:
-        void loadModel();
-        AvatarType  m_avatarType;
+        void loadModel(
+            irr::scene::ISceneManager *smgr);
+        irr::scene::IAnimatedMesh  *m_animatedMesh = NULL;
+        AvatarType                  m_avatarType;
 };
 
 #endif

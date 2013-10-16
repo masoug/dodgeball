@@ -50,6 +50,11 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         WallNode    *m_wWall = NULL;
         WallNode    *m_ceiling = NULL;
 
+        /* Players */
+        AvatarNode  *m_phil =   NULL;
+        AvatarNode  *m_hotdog =   NULL;
+        AvatarNode  *m_banana =   NULL;
+
         /* Irrlicht stuph... */
         irr::IrrlichtDevice             *m_device       = NULL;
         irr::video::IVideoDriver        *m_driver       = NULL;
@@ -70,6 +75,7 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         void fireDodgeball();
         void trackCamera(int x, int y);
         void handleCollisions();
+        void loadPlayers();
         DodgeballNode* getDodgeball(btRigidBody *body) const;
         std::vector<DodgeballNode* >        m_dodgeballs;
 };
