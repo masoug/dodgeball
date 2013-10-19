@@ -19,6 +19,8 @@
 irr::core::vector3df RodriguesRotate(
     irr::core::vector3df input, irr::core::vector3df axis, double rad);
 
+template<typename Type> Type* fromRigidbody(btRigidBody *body, std::vector<Type*> input);
+
 class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
     public:
         DodgeballEngine(unsigned int width, unsigned int height);
@@ -50,11 +52,6 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         WallNode    *m_wWall = NULL;
         WallNode    *m_ceiling = NULL;
 
-        /* Players */
-        AvatarNode  *m_phil =   NULL;
-        AvatarNode  *m_hotdog =   NULL;
-        AvatarNode  *m_banana =   NULL;
-
         /* Irrlicht stuph... */
         irr::IrrlichtDevice             *m_device       = NULL;
         irr::video::IVideoDriver        *m_driver       = NULL;
@@ -71,13 +68,16 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         btDiscreteDynamicsWorld             *m_dynamicsWorld    = NULL;
 
         /* Scene elements */
+        bool checkCollisions(btRigidBody *bodyA, btRigidBody *bodyB);
         DodgeballNode* addDodgeball(btVector3 pos);
         void fireDodgeball();
         void trackCamera(int x, int y);
         void handleCollisions();
+        std::vector<DodgeballNode*>        m_dodgeballs;
+        /* Players */
         void loadPlayers();
-        DodgeballNode* getDodgeball(btRigidBody *body) const;
-        std::vector<DodgeballNode* >        m_dodgeballs;
+        std::vector<AvatarNode*>   m_players;
+
 };
 
 #endif

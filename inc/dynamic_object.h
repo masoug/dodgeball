@@ -7,6 +7,8 @@
 #ifndef DYNAMIC_OBJECT_H_
 #define DYNAMIC_OBJECT_H_
 
+#include <string>
+
 #include <irrlicht.h>
 #include <btBulletDynamicsCommon.h>
 
@@ -18,8 +20,7 @@ class DynamicObject : public StateMachineBase {
         virtual ~DynamicObject();
 
         virtual void applyTransform();
-        virtual void onCollision();
-        //irr::scene::ISceneNode* getSceneNode() const;
+                //irr::scene::ISceneNode* getSceneNode() const;
         btRigidBody* getRigidBody() const;
 
     protected:
@@ -37,7 +38,8 @@ class DodgeballNode : public DynamicObject {
             btVector3 initPos);
         virtual ~DodgeballNode();
 
-        virtual void onCollision();
+        virtual void hitFloor();
+        virtual void hitPlayer();
 
         void throwBall(btVector3 impulse);
 };
@@ -54,28 +56,22 @@ class WallNode : public DynamicObject {
 
 class AvatarNode : public DynamicObject {
     public:
-        enum AvatarType {
-            NULL_AVATAR,
-            HOTDOG,
-            POPSICLE,
-            BANANA,
-            PHIL,
-            BLACKHAT,
-            SNOWMAN
+        enum TeamType {
+            RED, BLUE
         };
 
         AvatarNode(
             irr::IrrlichtDevice *device,
             btDiscreteDynamicsWorld *world,
             btVector3 initPos,
-            AvatarType type);
+            TeamType team,
+            std::string fileName);
         virtual ~AvatarNode();
+        virtual void boop(); // hit by ball
 
     private:
-        void loadModel(
-            irr::scene::ISceneManager *smgr);
         irr::scene::IAnimatedMesh  *m_animatedMesh = NULL;
-        AvatarType                  m_avatarType;
+        TeamType                    m_teamType;
 };
 
 #endif

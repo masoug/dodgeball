@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 
 #include "dynamic_object.h"
 
@@ -45,10 +46,6 @@ void DynamicObject::applyTransform() {
     m_sceneNode->setRotation(euler * irr::core::RADTODEG);
 }
 
-void DynamicObject::onCollision() {
-    /* Handle collisions */
-}
-
 btRigidBody* DynamicObject::getRigidBody() const {
     return m_rigidBody;
 }
@@ -92,9 +89,15 @@ DodgeballNode::~DodgeballNode() {
     /* dtor */
 }
 
-void DodgeballNode::onCollision() {
+void DodgeballNode::hitFloor() {
     if (getState() == DGDBL_ACTIVE)
-        std::cout << "COLLISION!!!" << std::endl;
+        std::cout << "(BALL): Hit Floor, inactive!" << std::endl;
+    setState(DGDBL_INACTIVE);
+}
+
+void DodgeballNode::hitPlayer() {
+    if (getState() == DGDBL_ACTIVE)
+        std::cout << "(BALL): Hit player, inactive!" << std::endl;
     setState(DGDBL_INACTIVE);
 }
 
@@ -149,9 +152,10 @@ AvatarNode::AvatarNode(
     irr::IrrlichtDevice *device,
     btDiscreteDynamicsWorld *world,
     btVector3 initPos,
-    AvatarType type)
+    TeamType team,
+    std::string fileName)
 {
-    m_avatarType = type;
+    m_teamType = team;
 
     if (!device) {
         setState(FATAL_STATE);
@@ -159,26 +163,26 @@ AvatarNode::AvatarNode(
     }
     
     irr::scene::ISceneManager *smgr = device->getSceneManager();
-    //irr::video::IVideoDriver *driver = device->getVideoDriver();
 
     /* Load the model file. */
-    loadModel(smgr);
+    m_animatedMesh = smgr->getMesh(fileName.c_str());
     m_sceneNode = smgr->addAnimatedMeshSceneNode(m_animatedMesh);
     m_sceneNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
     
     /* Setting scale; this is tricky... */
     irr::core::vector3df ext = m_sceneNode->getTransformedBoundingBox().getExtent();
-    m_sceneNode->setScale(irr::core::vector3df(
-        (2.0*HUMAN_RADIUS)/ext.X,
-        HUMAN_HEIGHT/ext.Y,
-        (2.0*HUMAN_RADIUS)/ext.Z));
+    //m_sceneNode->setScale(irr::core::vector3df(
+    //    (2.0*HUMAN_RADIUS)/ext.X,
+    //    HUMAN_HEIGHT/ext.Y,
+    //    (2.0*HUMAN_RADIUS)/ext.Z));
 
     btTransform transform;
     transform.setIdentity();
+    //initPos.setY(initPos.y()+(ext.Y/2.0));
     transform.setOrigin(initPos);
 
     m_motionState = new btDefaultMotionState(transform);
-    m_collisionShape = new btCapsuleShape(HUMAN_RADIUS, HUMAN_HEIGHT);
+    m_collisionShape = new btCapsuleShape(std::max(ext.X, ext.Z), ext.Y);
 
     /* Generate the rigidbody and local inertia... */
     btVector3 locInertia;
@@ -193,36 +197,20 @@ AvatarNode::AvatarNode(
     /* Simple hack to get things working for now...
      * There will need to be a way to determine which side
      * who is on so the mirroring works correctly.
+     *
+     * TODO: A way to make the player "face" the origin?
      */
-    m_sceneNode->setRotation(
-        irr::core::vector3df(0.0, 180.0, 0.0));
+    if (m_teamType == RED)
+        m_sceneNode->setRotation(
+            irr::core::vector3df(0.0, 180.0, 0.0));
+    
+    setState(PLAYER_ACTIVE);
 }
 
-void AvatarNode::loadModel(
-    irr::scene::ISceneManager *smgr) {
-    /* CASE STATEMENTS!!! */
-    switch (m_avatarType) {
-        case HOTDOG:
-            m_animatedMesh = smgr->getMesh(
-                "models/players/hotdog/hotdog.b3d");
-            break;
-        case POPSICLE:
-            break;
-        case BANANA:
-            m_animatedMesh = smgr->getMesh(
-                "models/players/banana/banana.b3d");
-            break;
-        case PHIL:
-            m_animatedMesh = smgr->getMesh(
-                "models/players/phil/phil.b3d");
-            break;
-        case BLACKHAT:
-            break;
-        case SNOWMAN:
-            break;
-        default:
-            break;
-    }
+void AvatarNode::boop() {
+    if (getState() == PLAYER_ACTIVE)
+        std::cout << "(PLAYER): BOOP!" << std::endl;
+    setState(PLAYER_OUT);
 }
 
 AvatarNode::~AvatarNode() {

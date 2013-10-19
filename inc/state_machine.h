@@ -17,9 +17,13 @@
 #define DGDBL_ACTIVE    10
 #define DGDBL_INACTIVE  11
 
+/* Player-specific states */
+#define PLAYER_ACTIVE   20
+#define PLAYER_OUT      21
+
 class StateMachineBase {
     public:
-        virtual unsigned char getState() const;
+        virtual unsigned int getState() const;
         virtual void setState(unsigned char state);
         virtual bool fatalError() const;
     

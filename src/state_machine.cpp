@@ -1,7 +1,7 @@
 #include "state_machine.h"
 
-unsigned char StateMachineBase::getState() const {
-    return m_internalState;
+unsigned int StateMachineBase::getState() const {
+    return (unsigned int)m_internalState;
 }
 
 void StateMachineBase::setState(unsigned char state) {
