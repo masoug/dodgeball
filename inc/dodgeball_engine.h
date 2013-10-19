@@ -14,11 +14,14 @@
 #include <btBulletDynamicsCommon.h>
 
 #include "dynamic_object.h"
+#include "state_machine.h"
 
 irr::core::vector3df RodriguesRotate(
     irr::core::vector3df input, irr::core::vector3df axis, double rad);
 
-class DodgeballEngine : public irr::IEventReceiver {
+template<typename Type> Type* fromRigidbody(btRigidBody *body, std::vector<Type*> input);
+
+class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
     public:
         DodgeballEngine(unsigned int width, unsigned int height);
         ~DodgeballEngine();
@@ -65,12 +68,16 @@ class DodgeballEngine : public irr::IEventReceiver {
         btDiscreteDynamicsWorld             *m_dynamicsWorld    = NULL;
 
         /* Scene elements */
+        bool checkCollisions(btRigidBody *bodyA, btRigidBody *bodyB);
         DodgeballNode* addDodgeball(btVector3 pos);
         void fireDodgeball();
         void trackCamera(int x, int y);
         void handleCollisions();
-        DodgeballNode* getDodgeball(btRigidBody *body) const;
-        std::vector<DodgeballNode* >        m_dodgeballs;
+        std::vector<DodgeballNode*>        m_dodgeballs;
+        /* Players */
+        void loadPlayers();
+        std::vector<AvatarNode*>   m_players;
+
 };
 
 #endif

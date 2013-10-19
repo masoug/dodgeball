@@ -18,6 +18,18 @@ irr::core::vector3df RodriguesRotate(
     return vrot;
 }
 
+template<typename Type> Type* fromRigidbody(
+    btRigidBody *body,
+    std::vector<Type*> input)
+{
+    for (unsigned int i = 0; i < input.size(); i++) {
+        if (body == input[i]->getRigidBody()) {
+            return input[i];
+        }
+    }
+    return NULL;
+}
+
 DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
     m_quit(false), m_windowWidth(width), m_windowHeight(height)
 {
@@ -54,6 +66,7 @@ DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
         m_dispatcher, m_broadphase, m_solver, m_collisionConfig);
     m_dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
 
+    setState(INIT_STATE);
 }
 
 DodgeballNode* DodgeballEngine::addDodgeball(btVector3 pos) {
@@ -76,6 +89,19 @@ void DodgeballEngine::fireDodgeball() {
     ball->throwBall(btVector3(imp.X, imp.Y, imp.Z));
 }
 
+void DodgeballEngine::loadPlayers() {
+    m_players.push_back(new AvatarNode(
+        m_device, m_dynamicsWorld, 
+        btVector3(2.5, 0.35, -2.5), AvatarNode::RED,
+        "models/players/hotdog/hotdog.b3d"));
+   //m_hotdog = new AvatarNode(
+   //     m_device, m_dynamicsWorld, 
+   //     btVector3(0.0, 0.35, -2.5), AvatarNode::HOTDOG);
+   //m_banana = new AvatarNode(
+   //     m_device, m_dynamicsWorld, 
+   //     btVector3(-2.5, 0.35, -2.5), AvatarNode::BANANA);
+}
+
 void DodgeballEngine::handleCollisions() {
     /* Handle them contact manifolds */
     int numManifolds = m_dynamicsWorld->getDispatcher()->getNumManifolds();
@@ -85,24 +111,47 @@ void DodgeballEngine::handleCollisions() {
         btRigidBody *bodyA = (btRigidBody*)(contactManifold->getBody0());
         btRigidBody *bodyB = (btRigidBody*)(contactManifold->getBody1());
 
-        DodgeballNode *ball = getDodgeball(bodyA);
-        if (ball && (bodyB == m_floor->getRigidBody()))
-            ball->onCollision();
-        else {
-            ball = getDodgeball(bodyB);
+        if (!checkCollisions(bodyA, bodyB))
+            checkCollisions(bodyB, bodyA);
+
+        /*
+        DodgeballNode *ball = fromRigidbody<DodgeballNode>(bodyA, m_dodgeballs);
+        if (ball) {
+            if (bodyB == m_floor->getRigidBody())
+                ball->hitFloor();
+            else {
+                AvatarNode *player = fromRigidbody<AvatarNode>(bodyB, m_players);
+                if (player) {
+                    player->boop();
+                    ball->hitPlayer();
+                }
+            }
+       } else {
+            ball = fromRigidbody<DodgeballNode>(bodyB, m_dodgeballs);
             if (ball && (bodyA == m_floor->getRigidBody()))
                 ball->onCollision();
-        }
+        }*/
     }
 }
 
-DodgeballNode* DodgeballEngine::getDodgeball(btRigidBody *body) const {
-    for (unsigned int i = 0; i < m_dodgeballs.size(); i++) {
-        if (body == m_dodgeballs[i]->getRigidBody()) {
-            return m_dodgeballs[i];
+bool DodgeballEngine::checkCollisions(btRigidBody *bodyA, btRigidBody *bodyB) {
+    /* Check half cases for body a and body b */
+    DodgeballNode *ball = fromRigidbody<DodgeballNode>(bodyA, m_dodgeballs);
+    if (ball) {
+        if (bodyB == m_floor->getRigidBody()) {
+            ball->hitFloor();
+            return true;
+        } else {
+            //std::cout << "CHECK PLAYER" << std::endl;
+            AvatarNode *player = fromRigidbody<AvatarNode>(bodyB, m_players);
+            if (player) {
+                player->boop();
+                ball->hitPlayer();
+                return true;
+            }
         }
-    }
-    return NULL;
+   }
+   return false;
 }
 
 void DodgeballEngine::setupScene() {
@@ -112,8 +161,9 @@ void DodgeballEngine::setupScene() {
     m_camera->setTarget(irr::core::vector3df(0.0, 0.0, 0.0));
     m_camera->setUpVector(irr::core::vector3df(0.0, 1.0, 0.0));
     
-    /* Build the court */
+    /* Build the court and add players */
     buildCourt();
+    loadPlayers();
 
     /* setup input systems */
     m_device->setEventReceiver(this);
@@ -155,6 +205,7 @@ void DodgeballEngine::clearScene() {
 }
 
 void DodgeballEngine::run() {
+    setState(DGBENG_RUNNING);
     double prevTime = m_timer->getTime();
 
     /* TODO: Maybe consider putting this loop at the top main()-level ? */
