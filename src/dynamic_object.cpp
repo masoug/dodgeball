@@ -171,6 +171,7 @@ AvatarNode::AvatarNode(
     
     /* Setting scale; this is tricky... */
     irr::core::vector3df ext = m_sceneNode->getTransformedBoundingBox().getExtent();
+    //std::cout << ext.X << ", " << ext.Y << ", " << ext.Z << std::endl;
     //m_sceneNode->setScale(irr::core::vector3df(
     //    (2.0*HUMAN_RADIUS)/ext.X,
     //    HUMAN_HEIGHT/ext.Y,
@@ -182,7 +183,9 @@ AvatarNode::AvatarNode(
     transform.setOrigin(initPos);
 
     m_motionState = new btDefaultMotionState(transform);
-    m_collisionShape = new btCapsuleShape(std::max(ext.X, ext.Z), ext.Y);
+    double radius = std::max(ext.X, ext.Z);
+    //m_collisionShape = new btCapsuleShape(radius, ext.Y);
+    m_collisionShape = new btCapsuleShape(radius, ext.Y-(radius/2.0));
 
     /* Generate the rigidbody and local inertia... */
     btVector3 locInertia;

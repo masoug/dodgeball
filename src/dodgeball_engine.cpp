@@ -92,7 +92,7 @@ void DodgeballEngine::fireDodgeball() {
 void DodgeballEngine::loadPlayers() {
     m_players.push_back(new AvatarNode(
         m_device, m_dynamicsWorld, 
-        btVector3(2.5, 0.35, -2.5), AvatarNode::RED,
+        btVector3(2.5, 0.855, -2.5), AvatarNode::RED,
         "models/players/hotdog/hotdog.b3d"));
    //m_hotdog = new AvatarNode(
    //     m_device, m_dynamicsWorld, 
@@ -156,7 +156,7 @@ bool DodgeballEngine::checkCollisions(btRigidBody *bodyA, btRigidBody *bodyB) {
 
 void DodgeballEngine::setupScene() {
     /* Shift the camera back */
-    m_camera->setPosition(irr::core::vector3df(0.0, 1.711, 4.0));
+    m_camera->setPosition(irr::core::vector3df(0.0, 1.6, 4.0));
     m_camera->bindTargetAndRotation(true);
     m_camera->setTarget(irr::core::vector3df(0.0, 0.0, 0.0));
     m_camera->setUpVector(irr::core::vector3df(0.0, 1.0, 0.0));
@@ -220,6 +220,7 @@ void DodgeballEngine::run() {
             /* then deal with irrlicht */
             m_driver->beginScene(true, true, irr::video::SColor(255, 0, 0, 255));
             m_scenemgr->drawAll();
+            updateHUD();
             m_driver->endScene();
         } else {
             m_device->yield();
@@ -237,6 +238,20 @@ void DodgeballEngine::updatePhysics(double timestep) {
 
     /* Handle the collisions */
     handleCollisions();
+}
+
+void DodgeballEngine::updateHUD() {
+    /* Render images and health etc... */
+    //m_driver->enableMaterial2D();
+
+    /* Draw crosshairs... */
+    irr::core::rect<irr::s32> windowSize = m_driver->getViewPort();
+    m_driver->draw2DImage(
+        m_driver->getTexture("models/crosshair.png"),
+        irr::core::position2d<irr::s32>((windowSize.getWidth()/2)-64, (windowSize.getHeight()/2)-64),
+        irr::core::rect<irr::s32>(0, 0, 128, 128), 0, irr::video::SColor(255, 255, 255, 255), true);
+
+    //m_driver->enableMaterial2D(false);
 }
 
 void DodgeballEngine::moveMe(double dx, double dy, double dz) {

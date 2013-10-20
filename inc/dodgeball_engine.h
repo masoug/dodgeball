@@ -31,6 +31,7 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         void clearScene();
         void run();
         void updatePhysics(double timestep);
+        void updateHUD();
         void moveMe(double dx, double dy, double dz);
 
         /* Event handling */
