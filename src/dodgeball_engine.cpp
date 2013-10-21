@@ -314,10 +314,11 @@ bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
 
 void DodgeballEngine::trackCamera(int x, int y) {
     /* rotate camera... */
-    int centerx = x - (m_windowWidth/2);
-    int centery = y - (m_windowHeight/2);
-    double xproportion = centerx / (m_windowWidth/2.0);
-    double yproportion = centery / (m_windowHeight/2.0);
+    irr::core::rect<irr::s32> windowSize = m_driver->getViewPort();
+    int centerx = x - (windowSize.getWidth()/2);
+    int centery = y - (windowSize.getHeight()/2);
+    double xproportion = centerx / (windowSize.getWidth()/2.0);
+    double yproportion = centery / (windowSize.getHeight()/2.0);
     irr::core::vector3df forward(
         -sin(xproportion*M_PI/2.0), 0.0, -cos(xproportion*M_PI/2.0));
     forward = forward.normalize();
