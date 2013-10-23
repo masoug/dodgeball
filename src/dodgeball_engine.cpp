@@ -43,7 +43,6 @@ DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
     m_device = irr::createDevice(
         irr::video::EDT_OPENGL,
         irr::core::dimension2d<irr::u32>(m_windowWidth, m_windowHeight));
-    std::cout << "PROBE" << std::endl;
     if (!m_device) {
         /* TODO: Set state to FATAL so that other guys can
          * recognize the error. For now, just return. */
@@ -113,7 +112,8 @@ void DodgeballEngine::loadPlayers() {
     m_thisPlayer = new CameraAvatar(
         m_device, m_dynamicsWorld, m_camera,
         btVector3(0.0, 3.0, 2.5), CameraAvatar::BLUE);
-    m_thisPlayer->setTargetVelocity(btVector3(0.0, 0.0, -2.0));
+    //m_thisPlayer->setTargetVelocity(btVector3(0.0, 0.0, -2.0));
+    m_thisPlayer->stop();
     m_players.push_back(m_thisPlayer);
 
     m_players.push_back(new AvatarNode(
@@ -290,19 +290,22 @@ bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
 
 void DodgeballEngine::handleKeyEvents() {
     /* handle them key events */
-    if (m_keyStates[irr::KEY_KEY_W])
-        m_thisPlayer->setForward(-1.0);
+    if (m_keyStates[irr::KEY_KEY_W]) 
+        m_thisPlayer->setForward(-2.0);
     else if (m_keyStates[irr::KEY_KEY_S])
-        m_thisPlayer->setForward(1.0);
+        m_thisPlayer->setForward(2.0);
     else
         m_thisPlayer->setForward(0.0);
 
     if (m_keyStates[irr::KEY_KEY_A])
-        m_thisPlayer->setLateral(1.0);
+        m_thisPlayer->setLateral(2.0);
     else if (m_keyStates[irr::KEY_KEY_D])
-        m_thisPlayer->setLateral(-1.0);
+        m_thisPlayer->setLateral(-2.0);
     else
         m_thisPlayer->setLateral(0.0);
+
+    if (m_keyStates[irr::KEY_KEY_Q] ||m_keyStates[irr::KEY_ESCAPE])
+        m_quit = true;
 }
 
 void DodgeballEngine::trackCamera(int x, int y) {

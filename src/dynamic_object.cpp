@@ -191,8 +191,12 @@ AvatarNode::AvatarNode(
     /* Generate the rigidbody and local inertia... */
     btVector3 locInertia;
     m_collisionShape->calculateLocalInertia(80.0, locInertia); // 80kg - avg human mass
-    m_rigidBody = new btRigidBody(
+    btRigidBody::btRigidBodyConstructionInfo constructInfo(
         80.0, m_motionState, m_collisionShape, locInertia);
+    constructInfo.m_friction = 0.001;
+    m_rigidBody = new btRigidBody(
+        constructInfo);
+        //80.0, m_motionState, m_collisionShape, locInertia);
     m_rigidBody->setRestitution(0.75);
     m_rigidBody->setAngularFactor(btVector3(0.0, 0.0, 0.0)); // no tumbling
 
@@ -227,7 +231,7 @@ void AvatarNode::setLateral(double lat) {
 }
 
 void AvatarNode::setForward(double forward) {
-    m_targetVel.setX(forward);
+    m_targetVel.setZ(forward);
 }
 
 void AvatarNode::stop() {
@@ -259,10 +263,10 @@ void AvatarNode::applyControlLoop() {
     btVector3 output = 1000*error;
     m_rigidBody->applyCentralForce(output);
     //m_rigidBody->applyCentralForce(btVector3(0.0, 0.0, -1000.0));
-    /*std::cout
-        << currentVel.getX() << ", " 
-        << currentVel.getY() << ", "
-        << currentVel.getZ() << std::endl;*/
+    std::cout
+        << output.getX() << ", " 
+        << output.getY() << ", "
+        << output.getZ() << std::endl;
 }
 
 AvatarNode::~AvatarNode() {
@@ -304,6 +308,8 @@ void CameraAvatar::applyTransform() {
 
     /* Apply control loop */
     applyControlLoop();
+
+    m_rigidBody->activate();
 }
 
 CameraAvatar::~CameraAvatar() {
