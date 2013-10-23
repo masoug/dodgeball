@@ -33,12 +33,17 @@ template<typename Type> Type* fromRigidbody(
 DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
     m_quit(false), m_windowWidth(width), m_windowHeight(height)
 {
+    /* Initialize the keycodes */
+    for (int i = 0; i < irr::KEY_KEY_CODES_COUNT; i++)
+        m_keyStates[i] = false;
+
     /* Initialize Irrlicht! */
     /* TODO: if the prototype is greenlit, then add more options to the 
      * device. It helps add flexibility :) */
     m_device = irr::createDevice(
         irr::video::EDT_OPENGL,
         irr::core::dimension2d<irr::u32>(m_windowWidth, m_windowHeight));
+    std::cout << "PROBE" << std::endl;
     if (!m_device) {
         /* TODO: Set state to FATAL so that other guys can
          * recognize the error. For now, just return. */
@@ -51,6 +56,11 @@ DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
     m_scenemgr = m_device->getSceneManager();
     /* TODO: Sometime in the future make a better FPS camera */
     m_camera = m_scenemgr->addCameraSceneNodeFPS(0, 100, 0.001);
+    m_camera->setNearValue((irr::f32)0.001);
+    m_camera->bindTargetAndRotation(true);
+    m_camera->setTarget(irr::core::vector3df(0.0, 0.0, 0.0));
+    m_camera->setUpVector(irr::core::vector3df(0.0, 1.0, 0.0));
+
     m_timer = m_device->getTimer();
     m_cursorCtrl = m_device->getCursorControl();
 
@@ -65,6 +75,9 @@ DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
     m_dynamicsWorld = new btDiscreteDynamicsWorld(
         m_dispatcher, m_broadphase, m_solver, m_collisionConfig);
     m_dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
+
+    /* setup input systems */
+    m_device->setEventReceiver(this);
 
     setState(INIT_STATE);
 }
@@ -82,14 +95,27 @@ void DodgeballEngine::fireDodgeball() {
     
     /* get impulse vector */
     irr::core::vector3df imp = target - pos;
-    imp = imp.normalize() * 7.0;
-
-    /* create ball and throw it */
-    DodgeballNode *ball = addDodgeball(btVector3(pos.X, pos.Y, pos.Z));
+    imp = imp.normalize();
+    btVector3 ballPos(pos.X, pos.Y, pos.Z);
+    ballPos += btVector3(imp.X, imp.Y, imp.Z) * (0.7);
+    imp *= 7.0; // impulse of 7 seems fine...
+    
+    /* Create ball and throw it.
+     * we add the ball at the target because we don't want it to collide with myself. */
+    DodgeballNode *ball = addDodgeball(ballPos);
     ball->throwBall(btVector3(imp.X, imp.Y, imp.Z));
 }
 
 void DodgeballEngine::loadPlayers() {
+    /* Create player */
+
+    /* Main camera the player is on */
+    m_thisPlayer = new CameraAvatar(
+        m_device, m_dynamicsWorld, m_camera,
+        btVector3(0.0, 3.0, 2.5), CameraAvatar::BLUE);
+    m_thisPlayer->setTargetVelocity(btVector3(0.0, 0.0, -2.0));
+    m_players.push_back(m_thisPlayer);
+
     m_players.push_back(new AvatarNode(
         m_device, m_dynamicsWorld, 
         btVector3(2.5, 0.855, -2.5), AvatarNode::RED,
@@ -113,24 +139,6 @@ void DodgeballEngine::handleCollisions() {
 
         if (!checkCollisions(bodyA, bodyB))
             checkCollisions(bodyB, bodyA);
-
-        /*
-        DodgeballNode *ball = fromRigidbody<DodgeballNode>(bodyA, m_dodgeballs);
-        if (ball) {
-            if (bodyB == m_floor->getRigidBody())
-                ball->hitFloor();
-            else {
-                AvatarNode *player = fromRigidbody<AvatarNode>(bodyB, m_players);
-                if (player) {
-                    player->boop();
-                    ball->hitPlayer();
-                }
-            }
-       } else {
-            ball = fromRigidbody<DodgeballNode>(bodyB, m_dodgeballs);
-            if (ball && (bodyA == m_floor->getRigidBody()))
-                ball->onCollision();
-        }*/
     }
 }
 
@@ -145,7 +153,8 @@ bool DodgeballEngine::checkCollisions(btRigidBody *bodyA, btRigidBody *bodyB) {
             //std::cout << "CHECK PLAYER" << std::endl;
             AvatarNode *player = fromRigidbody<AvatarNode>(bodyB, m_players);
             if (player) {
-                player->boop();
+                if (ball->getState() == DGDBL_ACTIVE)
+                    player->boop();
                 ball->hitPlayer();
                 return true;
             }
@@ -155,18 +164,9 @@ bool DodgeballEngine::checkCollisions(btRigidBody *bodyA, btRigidBody *bodyB) {
 }
 
 void DodgeballEngine::setupScene() {
-    /* Shift the camera back */
-    m_camera->setPosition(irr::core::vector3df(0.0, 1.6, 4.0));
-    m_camera->bindTargetAndRotation(true);
-    m_camera->setTarget(irr::core::vector3df(0.0, 0.0, 0.0));
-    m_camera->setUpVector(irr::core::vector3df(0.0, 1.0, 0.0));
-    
     /* Build the court and add players */
     buildCourt();
     loadPlayers();
-
-    /* setup input systems */
-    m_device->setEventReceiver(this);
 }
 
 void DodgeballEngine::buildCourt() {
@@ -213,6 +213,9 @@ void DodgeballEngine::run() {
      * better coding practice? */
     while(m_device->run() && m_driver && !m_quit) {
         if (m_device->isWindowActive()) {
+            /* handle key events */
+            handleKeyEvents();
+
             /* update physics stuff */
             updatePhysics((m_timer->getTime()-prevTime) * 0.001);
             prevTime = m_timer->getTime();
@@ -235,6 +238,8 @@ void DodgeballEngine::updatePhysics(double timestep) {
     /* apply to models */
     for (unsigned int i = 0; i < m_dodgeballs.size(); i++)
         m_dodgeballs[i]->applyTransform();
+    for (unsigned int i = 0; i < m_players.size(); i++)
+        m_players[i]->applyTransform();
 
     /* Handle the collisions */
     handleCollisions();
@@ -250,20 +255,15 @@ void DodgeballEngine::updateHUD() {
         m_driver->getTexture("models/crosshair.png"),
         irr::core::position2d<irr::s32>((windowSize.getWidth()/2)-64, (windowSize.getHeight()/2)-64),
         irr::core::rect<irr::s32>(0, 0, 128, 128), 0, irr::video::SColor(255, 255, 255, 255), true);
+    
+    /* Draw possessions */
+    for (int ballsRemaining = 0; ballsRemaining < 3; ballsRemaining++)
+        m_driver->draw2DImage(
+            m_driver->getTexture("models/logo-blue.png"),
+            irr::core::position2d<irr::s32>(70*ballsRemaining+20, 20),
+            irr::core::rect<irr::s32>(0, 0, 64, 64), 0, irr::video::SColor(255, 255, 255, 255), true);
 
     //m_driver->enableMaterial2D(false);
-}
-
-void DodgeballEngine::moveMe(double dx, double dy, double dz) {
-    /* Move me!
-     * We have to be careful here, since we exist in both Bullet's and Irrlicht's world,
-     * we need to make sure that we move both the bullet rigidbody and the scenenode.
-     */
-    irr::core::vector3df camLoc = m_camera->getAbsolutePosition();
-    camLoc.X += dx;
-    camLoc.Y += dy;
-    camLoc.Z += dz;
-    m_camera->setPosition(camLoc);
 }
 
 bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
@@ -283,33 +283,26 @@ bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
         }
         return true;
     } else if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
-        if (event.KeyInput.PressedDown) {
-            /* do the yucky case statements! */
-            switch (event.KeyInput.Key) {
-                case irr::KEY_KEY_W:
-                    moveMe(0.0, 0.0, -0.5);
-                    break;
-                case irr::KEY_KEY_A:
-                    moveMe(0.5, 0.0, 0.0);
-                    break;
-                case irr::KEY_KEY_S:
-                    moveMe(0.0, 0.0, 0.5);
-                    break;
-                case irr::KEY_KEY_D:
-                    moveMe(-0.5, 0.0, 0.0);
-                    break;
-                case irr::KEY_KEY_Q:
-                    m_quit = true;
-                    break;
-                case irr::KEY_ESCAPE:
-                    m_quit = true;
-                    break;
-                default:
-                    break;
-            }
-        }
+        m_keyStates[event.KeyInput.Key] = event.KeyInput.PressedDown;
     }
     return false;
+}
+
+void DodgeballEngine::handleKeyEvents() {
+    /* handle them key events */
+    if (m_keyStates[irr::KEY_KEY_W])
+        m_thisPlayer->setForward(-1.0);
+    else if (m_keyStates[irr::KEY_KEY_S])
+        m_thisPlayer->setForward(1.0);
+    else
+        m_thisPlayer->setForward(0.0);
+
+    if (m_keyStates[irr::KEY_KEY_A])
+        m_thisPlayer->setLateral(1.0);
+    else if (m_keyStates[irr::KEY_KEY_D])
+        m_thisPlayer->setLateral(-1.0);
+    else
+        m_thisPlayer->setLateral(0.0);
 }
 
 void DodgeballEngine::trackCamera(int x, int y) {

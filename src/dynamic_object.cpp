@@ -5,11 +5,6 @@
 
 #define FREE(ptr) if (ptr) { delete ptr; }
 
-/* All units metric, mass in kg */
-#define DODGEBALL_RADIUS    0.1524
-#define DODGEBALL_MASS      0.680389
-#define HUMAN_RADIUS        0.2286
-#define HUMAN_HEIGHT        1.711
 
 DynamicObject::DynamicObject() {
     setState(INIT_STATE);
@@ -23,10 +18,9 @@ DynamicObject::~DynamicObject() {
 }
 
 void DynamicObject::applyTransform() {
-    if (!(m_sceneNode && m_rigidBody)) {
-        /* TODO: switch to an error state! */
+    /* Just ignore if sceneNode or rigidbody is null */
+    if (!(m_sceneNode && m_rigidBody)) 
         return;
-    }
 
     /* Copy the transform from bullet to the irrlicht node */
     btVector3 pos = m_rigidBody->getCenterOfMassPosition();
@@ -91,7 +85,7 @@ DodgeballNode::~DodgeballNode() {
 
 void DodgeballNode::hitFloor() {
     if (getState() == DGDBL_ACTIVE)
-        std::cout << "(BALL): Hit Floor, inactive!" << std::endl;
+        std::cout << "(BALL): Hit floor, inactive!" << std::endl;
     setState(DGDBL_INACTIVE);
 }
 
@@ -153,7 +147,8 @@ AvatarNode::AvatarNode(
     btDiscreteDynamicsWorld *world,
     btVector3 initPos,
     TeamType team,
-    std::string fileName)
+    std::string fileName) :
+    m_targetVel(0.0, 0.0, 0.0)
 {
     m_teamType = team;
 
@@ -165,34 +160,41 @@ AvatarNode::AvatarNode(
     irr::scene::ISceneManager *smgr = device->getSceneManager();
 
     /* Load the model file. */
-    m_animatedMesh = smgr->getMesh(fileName.c_str());
-    m_sceneNode = smgr->addAnimatedMeshSceneNode(m_animatedMesh);
-    m_sceneNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
-    
-    /* Setting scale; this is tricky... */
-    irr::core::vector3df ext = m_sceneNode->getTransformedBoundingBox().getExtent();
-    //std::cout << ext.X << ", " << ext.Y << ", " << ext.Z << std::endl;
-    //m_sceneNode->setScale(irr::core::vector3df(
-    //    (2.0*HUMAN_RADIUS)/ext.X,
-    //    HUMAN_HEIGHT/ext.Y,
-    //    (2.0*HUMAN_RADIUS)/ext.Z));
+    if (fileName != "NULL") {
+        m_animatedMesh = smgr->getMesh(fileName.c_str());
+        m_sceneNode = smgr->addAnimatedMeshSceneNode(m_animatedMesh);
+        m_sceneNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+    }
 
     btTransform transform;
     transform.setIdentity();
     //initPos.setY(initPos.y()+(ext.Y/2.0));
     transform.setOrigin(initPos);
-
+    
     m_motionState = new btDefaultMotionState(transform);
-    double radius = std::max(ext.X, ext.Z);
-    //m_collisionShape = new btCapsuleShape(radius, ext.Y);
-    m_collisionShape = new btCapsuleShape(radius, ext.Y-(radius/2.0));
+    if (m_sceneNode != NULL) {
+        /* Setting scale; this is tricky... */
+        irr::core::vector3df ext = m_sceneNode->getTransformedBoundingBox().getExtent();
+        //std::cout << ext.X << ", " << ext.Y << ", " << ext.Z << std::endl;
+        //m_sceneNode->setScale(irr::core::vector3df(
+        //    (2.0*HUMAN_RADIUS)/ext.X,
+        //    HUMAN_HEIGHT/ext.Y,
+        //    (2.0*HUMAN_RADIUS)/ext.Z));
+
+        double radius = std::max(ext.X, ext.Z);
+        //m_collisionShape = new btCapsuleShape(radius, ext.Y);
+        m_collisionShape = new btCapsuleShape(radius, ext.Y-(radius/2.0));
+    } else {
+        m_collisionShape = new btCapsuleShape(HUMAN_RADIUS, HUMAN_HEIGHT);
+    }
 
     /* Generate the rigidbody and local inertia... */
     btVector3 locInertia;
-    m_collisionShape->calculateLocalInertia(0.0, locInertia);
+    m_collisionShape->calculateLocalInertia(80.0, locInertia); // 80kg - avg human mass
     m_rigidBody = new btRigidBody(
-        0.0, m_motionState, m_collisionShape, locInertia);
+        80.0, m_motionState, m_collisionShape, locInertia);
     m_rigidBody->setRestitution(0.75);
+    m_rigidBody->setAngularFactor(btVector3(0.0, 0.0, 0.0)); // no tumbling
 
     world->addRigidBody(m_rigidBody);
     applyTransform();
@@ -203,7 +205,7 @@ AvatarNode::AvatarNode(
      *
      * TODO: A way to make the player "face" the origin?
      */
-    if (m_teamType == RED)
+    if (m_teamType == RED && m_sceneNode)
         m_sceneNode->setRotation(
             irr::core::vector3df(0.0, 180.0, 0.0));
     
@@ -216,9 +218,94 @@ void AvatarNode::boop() {
     setState(PLAYER_OUT);
 }
 
+void AvatarNode::setTargetVelocity(btVector3 vel) {
+    m_targetVel = vel;
+}
+
+void AvatarNode::setLateral(double lat) {
+    m_targetVel.setX(lat);
+}
+
+void AvatarNode::setForward(double forward) {
+    m_targetVel.setX(forward);
+}
+
+void AvatarNode::stop() {
+    m_targetVel.setZero();
+}
+
+void AvatarNode::applyTransform() {
+    /* Modified transforms... */
+    
+    /* Just ignore if sceneNode or rigidbody is null */
+    if (!(m_sceneNode && m_rigidBody)) 
+        return;
+
+    /* Copy the transform from bullet to the irrlicht node */
+    /* we dont' care about rotation, there won't be any tumbling */
+    btVector3 pos = m_rigidBody->getCenterOfMassPosition();
+    m_sceneNode->setPosition(irr::core::vector3df(
+        (irr::f32)pos[0],
+        (irr::f32)pos[1],
+        (irr::f32)pos[2]));
+
+    /* Apply control loop to the model */
+    //applyControlLoop();
+}
+
+void AvatarNode::applyControlLoop() {
+    btVector3 currentVel = m_rigidBody->getLinearVelocity();
+    btVector3 error = m_targetVel - currentVel;
+    btVector3 output = 1000*error;
+    m_rigidBody->applyCentralForce(output);
+    //m_rigidBody->applyCentralForce(btVector3(0.0, 0.0, -1000.0));
+    /*std::cout
+        << currentVel.getX() << ", " 
+        << currentVel.getY() << ", "
+        << currentVel.getZ() << std::endl;*/
+}
+
 AvatarNode::~AvatarNode() {
     /* dtor */
     std::cout << "DROP PLAYA" << std::endl;
     m_animatedMesh->drop();
 }
 
+CameraAvatar::CameraAvatar(
+    irr::IrrlichtDevice *device,
+    btDiscreteDynamicsWorld *world,
+    irr::scene::ICameraSceneNode *camera,
+    btVector3 initPos,
+    TeamType team) :
+    AvatarNode(device, world, initPos, team, "NULL")
+{
+    m_sceneNode = camera;
+    
+    /* Simple hack to get things working for now...
+     * There will need to be a way to determine which side
+     * who is on so the mirroring works correctly.
+     *
+     * TODO: A way to make the player "face" the origin?
+     */
+    if (m_teamType == RED && m_sceneNode)
+        m_sceneNode->setRotation(
+            irr::core::vector3df(0.0, 180.0, 0.0));
+}
+
+void CameraAvatar::applyTransform() {
+    /* Modified transforms... */
+    /* Copy the transform from bullet to the irrlicht node */
+    /* we dont' care about rotation, there won't be any tumbling */
+    btVector3 pos = m_rigidBody->getCenterOfMassPosition();
+    m_sceneNode->setPosition(irr::core::vector3df(
+        (irr::f32)pos[0],
+        (irr::f32)pos[1]+(HUMAN_HEIGHT/2.0),
+        (irr::f32)pos[2]));
+
+    /* Apply control loop */
+    applyControlLoop();
+}
+
+CameraAvatar::~CameraAvatar() {
+    /* destruct!!! */
+}

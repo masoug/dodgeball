@@ -32,7 +32,6 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         void run();
         void updatePhysics(double timestep);
         void updateHUD();
-        void moveMe(double dx, double dy, double dz);
 
         /* Event handling */
         virtual bool OnEvent(const irr::SEvent& event);
@@ -40,6 +39,8 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
     private:
         /* Administrative stuff */
         bool m_quit;
+        bool m_keyStates[irr::KEY_KEY_CODES_COUNT];
+        void handleKeyEvents();
 
         /* window dimensions */
         unsigned int    m_windowWidth;
@@ -67,6 +68,11 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         btCollisionDispatcher               *m_dispatcher       = NULL;
         btSequentialImpulseConstraintSolver *m_solver           = NULL;
         btDiscreteDynamicsWorld             *m_dynamicsWorld    = NULL;
+        
+        /* Players */
+        void loadPlayers();
+        AvatarNode                  *m_thisPlayer = NULL;
+        std::vector<AvatarNode*>     m_players;
 
         /* Scene elements */
         bool checkCollisions(btRigidBody *bodyA, btRigidBody *bodyB);
@@ -75,10 +81,6 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         void trackCamera(int x, int y);
         void handleCollisions();
         std::vector<DodgeballNode*>        m_dodgeballs;
-        /* Players */
-        void loadPlayers();
-        std::vector<AvatarNode*>   m_players;
-
 };
 
 #endif

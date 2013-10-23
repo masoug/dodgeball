@@ -5,7 +5,7 @@ OBJ_DIR	:=	obj
 SRC_DIR	:=	src
 
 TARGET 	:= 	dodgeball
-SRCS	:= 	main.cpp dodgeball_engine.cpp dynamic_object.cpp state_machine.cpp
+SRCS	:= 	main.cpp dodgeball_engine.cpp dynamic_object.cpp state_machine.cpp 
 OBJS	:= 	$(SRCS:.cpp=.o)
 OBJS	:=	$(patsubst %, $(OBJ_DIR)/%, $(OBJS))
 

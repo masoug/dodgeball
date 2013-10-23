@@ -14,6 +14,12 @@
 
 #include "state_machine.h"
 
+/* All units metric, mass in kg */
+#define DODGEBALL_RADIUS    0.1524
+#define DODGEBALL_MASS      0.680389
+#define HUMAN_RADIUS        0.2286
+#define HUMAN_HEIGHT        1.711
+
 class DynamicObject : public StateMachineBase {
     public:
         DynamicObject();
@@ -67,11 +73,31 @@ class AvatarNode : public DynamicObject {
             TeamType team,
             std::string fileName);
         virtual ~AvatarNode();
+        
         virtual void boop(); // hit by ball
+        void setTargetVelocity(btVector3 vel);
+        void setLateral(double lat);
+        void setForward(double forward);
+        void stop();
+        virtual void applyTransform();
+        virtual void applyControlLoop();
 
-    private:
+    protected:
         irr::scene::IAnimatedMesh  *m_animatedMesh = NULL;
         TeamType                    m_teamType;
+        btVector3                   m_targetVel;
+};
+
+class CameraAvatar : public AvatarNode {
+    public:
+        CameraAvatar(
+            irr::IrrlichtDevice *device,
+            btDiscreteDynamicsWorld *world,
+            irr::scene::ICameraSceneNode *camera,
+            btVector3 initPos,
+            TeamType team);
+        virtual ~CameraAvatar();
+        virtual void applyTransform();
 };
 
 #endif
