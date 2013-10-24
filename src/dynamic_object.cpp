@@ -254,7 +254,7 @@ void AvatarNode::applyTransform() {
         (irr::f32)pos[2]));
 
     /* Apply control loop to the model */
-    //applyControlLoop();
+    applyControlLoop();
 }
 
 void AvatarNode::applyControlLoop() {
@@ -263,10 +263,10 @@ void AvatarNode::applyControlLoop() {
     btVector3 output = 1000*error;
     m_rigidBody->applyCentralForce(output);
     //m_rigidBody->applyCentralForce(btVector3(0.0, 0.0, -1000.0));
-    std::cout
-        << output.getX() << ", " 
-        << output.getY() << ", "
-        << output.getZ() << std::endl;
+    //std::cout
+    //    << output.getX() << ", " 
+    //    << output.getY() << ", "
+    //    << output.getZ() << std::endl;
 }
 
 AvatarNode::~AvatarNode() {

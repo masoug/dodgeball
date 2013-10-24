@@ -291,16 +291,16 @@ bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
 void DodgeballEngine::handleKeyEvents() {
     /* handle them key events */
     if (m_keyStates[irr::KEY_KEY_W]) 
-        m_thisPlayer->setForward(-2.0);
+        m_thisPlayer->setForward(-3.0);
     else if (m_keyStates[irr::KEY_KEY_S])
-        m_thisPlayer->setForward(2.0);
+        m_thisPlayer->setForward(3.0);
     else
         m_thisPlayer->setForward(0.0);
 
     if (m_keyStates[irr::KEY_KEY_A])
-        m_thisPlayer->setLateral(2.0);
+        m_thisPlayer->setLateral(3.0);
     else if (m_keyStates[irr::KEY_KEY_D])
-        m_thisPlayer->setLateral(-2.0);
+        m_thisPlayer->setLateral(-3.0);
     else
         m_thisPlayer->setLateral(0.0);
 
