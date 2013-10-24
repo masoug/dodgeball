@@ -255,6 +255,8 @@ void AvatarNode::applyTransform() {
 
     /* Apply control loop to the model */
     applyControlLoop();
+
+    m_rigidBody->activate();
 }
 
 void AvatarNode::applyControlLoop() {
@@ -309,7 +311,20 @@ void CameraAvatar::applyTransform() {
     /* Apply control loop */
     applyControlLoop();
 
-    m_rigidBody->activate();
+    /* Check if the player is out of bounds!
+     * if a player crosses the center line, then his/her team loses a point.
+     */
+    if (m_teamType == RED) {
+        /* Check if my z position is greater than zero. */
+        if (pos.getZ() > 0.0)
+            std::cout << "CROSSED CENTER LINE!!!" << std::endl;
+    } else if (m_teamType == BLUE) {
+        /* check if my z position is less than 0.0 */
+        if (pos.getZ() < 0.0)
+            std::cout << "CROSSED CENTER LINE!!!" << std::endl;
+    }
+
+    m_rigidBody->activate(); //Bullet deactivates bodies that have zero velocity
 }
 
 CameraAvatar::~CameraAvatar() {

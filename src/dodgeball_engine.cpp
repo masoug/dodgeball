@@ -97,7 +97,7 @@ void DodgeballEngine::fireDodgeball() {
     imp = imp.normalize();
     btVector3 ballPos(pos.X, pos.Y, pos.Z);
     ballPos += btVector3(imp.X, imp.Y, imp.Z) * (0.7);
-    imp *= 7.0; // impulse of 7 seems fine...
+    imp *= 8.0; // applying an impulse simulates throwing a ball 
     
     /* Create ball and throw it.
      * we add the ball at the target because we don't want it to collide with myself. */
@@ -111,7 +111,7 @@ void DodgeballEngine::loadPlayers() {
     /* Main camera the player is on */
     m_thisPlayer = new CameraAvatar(
         m_device, m_dynamicsWorld, m_camera,
-        btVector3(0.0, 3.0, 2.5), CameraAvatar::BLUE);
+        btVector3(0.0, 1.0, 2.5), AvatarNode::BLUE);
     //m_thisPlayer->setTargetVelocity(btVector3(0.0, 0.0, -2.0));
     m_thisPlayer->stop();
     m_players.push_back(m_thisPlayer);
