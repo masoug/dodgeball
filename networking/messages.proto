@@ -1,0 +1,37 @@
+package NetProtocol;
+
+message Vector3 {
+    required float x = 1;
+    required float y = 2;
+    required float z = 3;
+}
+
+message RequestPlayer {
+    required string name = 1;
+}
+
+message PlayerConfirmation {
+    required uint32 id = 1;
+    required string name = 2;
+    required uint32 type = 3;
+    required Vector3 initPos = 4;
+}
+
+message Error {
+    required uint32 errorCode = 1;
+    required string errorMsg = 2;
+}
+
+message NetPacket {
+    enum Type {
+        VECTOR3 = 1; REQPLAYER = 2; PLAYERCONFIRM = 3;
+        ERROR = 4;
+    }
+
+    required Type type = 1;
+
+    optional Vector3 vector3 = 2;
+    optional RequestPlayer request_player = 3;
+    optional PlayerConfirmation player_confirmation = 4;
+    optional Error error = 5;
+}

@@ -5,21 +5,21 @@ OBJ_DIR	:= ./
 SRC_DIR	:= ./
 
 TARGET 	:= 	networking
-SRCS	:= 	main.cpp
+SRCS	:= 	main.cpp messages.pb.cpp
 OBJS	:= 	$(SRCS:.cpp=.o)
 OBJS	:=	$(patsubst %, $(OBJ_DIR)/%, $(OBJS))
 
-INC		:= 	-I$(INC_DIR) -I/usr/include/google 
+INC		:= 	-I$(INC_DIR) -I/usr/include/google -I/usr/include/OpenThreads
 CCFLAGS	:= 	-Wall $(INC)
 LDFLAGS	:= 	
-LIBS	:= 	-lprotobuf -lenet
+LIBS	:= 	-lprotobuf -lenet -lOpenThreads
 
 CC		:= 	g++
 
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
+$(TARGET): $(OBJS) 
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp 
