@@ -262,7 +262,7 @@ void AvatarNode::applyTransform() {
 void AvatarNode::applyControlLoop() {
     btVector3 currentVel = m_rigidBody->getLinearVelocity();
     btVector3 error = m_targetVel - currentVel;
-    btVector3 output = 1000*error;
+    btVector3 output = 1000*error; // 1000 turned out to be a good gain value...
     m_rigidBody->applyCentralForce(output);
     //m_rigidBody->applyCentralForce(btVector3(0.0, 0.0, -1000.0));
     //std::cout
