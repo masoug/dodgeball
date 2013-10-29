@@ -29,6 +29,7 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         void setupScene();
         void buildCourt();
         void clearScene();
+        bool setupNetwork();
         void run();
         void updatePhysics(double timestep);
         void updateHUD();
@@ -61,6 +62,7 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         irr::scene::ICameraSceneNode    *m_camera       = NULL;
         irr::ITimer                     *m_timer        = NULL;
         irr::gui::ICursorControl        *m_cursorCtrl   = NULL;
+        irr::gui::IGUIEnvironment       *m_guiEnv       = NULL;
 
         /* Bullet stuph... */
         btBroadphaseInterface               *m_broadphase       = NULL;

@@ -13,10 +13,16 @@ int main(int argc, char **argv) {
 
     /* Initialize the dodgeball engine. */
     DodgeballEngine engine(640, 480);
-    engine.setupScene();
+    
+    /* First ask the player for the network info */
+    if (engine.setupNetwork()) {
+        
+        /* Then set up the scene */
+        engine.setupScene();
 
-    /* Enter the main simulation loop. */
-    engine.run();
+        /* Enter the main simulation loop. */
+        engine.run();
+    }
 
     /* Once we're done... */
     //engine.clearScene();

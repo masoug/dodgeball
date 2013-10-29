@@ -53,6 +53,14 @@ DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
     /* Initialize the rest of Irrlicht */
     m_driver = m_device->getVideoDriver();
     m_scenemgr = m_device->getSceneManager();
+    m_guiEnv = m_device->getGUIEnvironment();
+    
+    /* Setup gui stuff */
+    irr::gui::IGUISkin *guiSkin = m_guiEnv->getSkin();
+    irr::gui::IGUIFont *guiFont = m_guiEnv->getFont("models/font.bmp");
+    if (guiFont)
+        guiSkin->setFont(guiFont);
+
     /* TODO: Sometime in the future make a better FPS camera */
     m_camera = m_scenemgr->addCameraSceneNodeFPS(0, 100, 0.001);
     m_camera->setNearValue((irr::f32)0.001);
@@ -204,6 +212,35 @@ void DodgeballEngine::clearScene() {
     std::cout << "Done clearing scene." << std::endl;
 }
 
+bool DodgeballEngine::setupNetwork() {
+    /* Setup gui */
+    irr::gui::IGUIWindow *window = m_guiEnv->addWindow(
+        irr::core::rect<irr::s32>(120, 80, 120+240, 190),
+        true, L"Connect to server...");
+    m_guiEnv->addStaticText(
+        L"Server address:", irr::core::rect<irr::s32>(10, 40, 110, 60),
+        false, false, window);
+    m_guiEnv->addEditBox(
+        L"localhost", irr::core::rect<irr::s32>(115, 37, 215, 57), 
+        false, window);
+    m_guiEnv->addButton(
+        irr::core::rect<irr::s32>(90, 70, 140, 90),
+        window, 0, L"Connect!");
+    
+    /* run a simple loop to query the user for connection params. */
+    while(m_device->run() && m_driver) {
+        if (m_device->isWindowActive()) {
+            m_driver->beginScene(
+                true, true, irr::video::SColor(0, 200, 200, 200));
+            m_guiEnv->drawAll();
+            m_driver->endScene();
+        } else {
+            m_device->yield();
+        }
+    }
+    return false;
+}
+
 void DodgeballEngine::run() {
     setState(DGBENG_RUNNING);
     double prevTime = m_timer->getTime();
@@ -269,13 +306,15 @@ void DodgeballEngine::updateHUD() {
 bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
     /* handle events */
     if (event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
+        if (getState() != DGBENG_RUNNING)
+            return false;
         switch(event.MouseInput.Event)
         {
         case irr::EMIE_LMOUSE_PRESSED_DOWN:
-            fireDodgeball();
+                fireDodgeball();
             break;
         case irr::EMIE_MOUSE_MOVED:
-            trackCamera(event.MouseInput.X, event.MouseInput.Y);
+                trackCamera(event.MouseInput.X, event.MouseInput.Y);
             break;
         default:
             // We won't use the wheel
@@ -284,6 +323,14 @@ bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
         return true;
     } else if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
         m_keyStates[event.KeyInput.Key] = event.KeyInput.PressedDown;
+    } else if (event.EventType == irr::EET_GUI_EVENT) {
+        if (getState() != DGBENG_RUNNING)
+            return false;
+        switch (event.GUIEvent.EventType) {
+            default:
+                break;
+        }
+        return true;
     }
     return false;
 }
