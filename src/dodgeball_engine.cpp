@@ -30,8 +30,10 @@ template<typename Type> Type* fromRigidbody(
     return NULL;
 }
 
-DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
-    m_quit(false), m_windowWidth(width), m_windowHeight(height)
+DodgeballEngine::DodgeballEngine(
+    unsigned int width, unsigned int height, bool serverMode) :
+    m_quit(false), m_serverMode(serverMode),
+    m_windowWidth(width), m_windowHeight(height)
 {
     /* Initialize the keycodes */
     for (int i = 0; i < irr::KEY_KEY_CODES_COUNT; i++)
@@ -60,6 +62,26 @@ DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
     irr::gui::IGUIFont *guiFont = m_guiEnv->getFont("models/font.bmp");
     if (guiFont)
         guiSkin->setFont(guiFont);
+    m_guiEnv->addButton(
+        irr::core::rect<irr::s32>(10, 40, 200, 70), NULL,
+        GUI_ID_CONNECT_WINDOW, L"Connect to Server");
+    m_guiConnectWindow = m_guiEnv->addWindow(
+        irr::core::rect<irr::s32>(120, 80, 120+240, 190),
+        true, L"Connect to server...");
+    m_guiEnv->addStaticText(
+        L"Server address:", irr::core::rect<irr::s32>(10, 40, 110, 60),
+        false, false, m_guiConnectWindow);
+    m_guiServerAddrField = m_guiEnv->addEditBox(
+        L"localhost", irr::core::rect<irr::s32>(115, 37, 215, 57), 
+        false, m_guiConnectWindow);
+    m_guiConnectButton = m_guiEnv->addButton(
+        irr::core::rect<irr::s32>(70, 70, 160, 90),
+        m_guiConnectWindow, GUI_ID_CONNECT_BUTTON, L"Connect!");
+    m_guiStatusText = m_guiEnv->addStaticText(
+        L"Hello! Please connect to a server!",
+        irr::core::rect<irr::s32>(10, 10, 630, 30), true, true);
+    m_guiConnectWindow->setVisible(false);
+
 
     /* TODO: Sometime in the future make a better FPS camera */
     m_camera = m_scenemgr->addCameraSceneNodeFPS(0, 100, 0.001);
@@ -85,6 +107,12 @@ DodgeballEngine::DodgeballEngine(unsigned int width, unsigned int height) :
 
     /* setup input systems */
     m_device->setEventReceiver(this);
+
+    /* Setup network engine */
+    if (serverMode)
+        m_netEngine = new DodgeballServer(DODGEBALL_NET_PORT);
+    else
+        m_netEngine = new DodgeballClient();
 
     setState(INIT_STATE);
 }
@@ -213,20 +241,7 @@ void DodgeballEngine::clearScene() {
 }
 
 bool DodgeballEngine::setupNetwork() {
-    /* Setup gui */
-    irr::gui::IGUIWindow *window = m_guiEnv->addWindow(
-        irr::core::rect<irr::s32>(120, 80, 120+240, 190),
-        true, L"Connect to server...");
-    m_guiEnv->addStaticText(
-        L"Server address:", irr::core::rect<irr::s32>(10, 40, 110, 60),
-        false, false, window);
-    m_guiEnv->addEditBox(
-        L"localhost", irr::core::rect<irr::s32>(115, 37, 215, 57), 
-        false, window);
-    m_guiEnv->addButton(
-        irr::core::rect<irr::s32>(90, 70, 140, 90),
-        window, 0, L"Connect!");
-    
+        
     /* run a simple loop to query the user for connection params. */
     while(m_device->run() && m_driver) {
         if (m_device->isWindowActive()) {
@@ -312,25 +327,50 @@ bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
         {
         case irr::EMIE_LMOUSE_PRESSED_DOWN:
                 fireDodgeball();
+                return true;
             break;
         case irr::EMIE_MOUSE_MOVED:
                 trackCamera(event.MouseInput.X, event.MouseInput.Y);
+                return true;
             break;
         default:
-            // We won't use the wheel
+            return false;
             break;
         }
-        return true;
     } else if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
         m_keyStates[event.KeyInput.Key] = event.KeyInput.PressedDown;
     } else if (event.EventType == irr::EET_GUI_EVENT) {
-        if (getState() != DGBENG_RUNNING)
-            return false;
+        /* Get id of thingy that sent event */
+        irr::s32 id = event.GUIEvent.Caller->getID();
+
         switch (event.GUIEvent.EventType) {
+            case irr::gui::EGET_BUTTON_CLICKED:
+                switch(id) {
+                    case GUI_ID_CONNECT_BUTTON:
+                    {
+                        const wchar_t *wcstring =
+                            m_guiServerAddrField->getText();
+                        char addr[(wcslen(wcstring)+1)*sizeof(wchar_t)];
+                        wcstombs(addr, wcstring, sizeof(addr));
+                        std::cout << addr << std::endl;
+                        //m_guiConnectButton->setText(L"Connecting...");
+                        //m_guiConnectButton->setEnabled(false);
+                        m_guiConnectWindow->setVisible(false);
+                        m_guiStatusText->setText(L"Connecting...");
+                        return true;
+                        break;
+                    }
+                    case GUI_ID_CONNECT_WINDOW:
+                        m_guiConnectWindow->setVisible(true);
+                        break;
+                    default:
+                        return false;
+                        break;
+                }
             default:
+                return false;
                 break;
         }
-        return true;
     }
     return false;
 }
@@ -382,6 +422,9 @@ void DodgeballEngine::trackCamera(int x, int y) {
 
 DodgeballEngine::~DodgeballEngine() {
     std::cout << "Stopping engine..." << std::endl;
+    /* Stop network engine */
+    m_netEngine->gracefulStop();
+
     /* Bye bye Bullet! */
     FREE(m_dynamicsWorld)
     FREE(m_solver)

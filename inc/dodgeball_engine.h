@@ -15,6 +15,17 @@
 
 #include "dynamic_object.h"
 #include "state_machine.h"
+#include "networking.h"
+
+/* Port to operate on */
+#define DODGEBALL_NET_PORT 4538
+
+/* GUI Enums */
+enum {
+    GUI_ID_CONNECT_BUTTON = 101,
+    GUI_ID_CONNECT_WINDOW,
+    GUI_ID_REGISTER_WINDOW
+};
 
 irr::core::vector3df RodriguesRotate(
     irr::core::vector3df input, irr::core::vector3df axis, double rad);
@@ -23,7 +34,8 @@ template<typename Type> Type* fromRigidbody(btRigidBody *body, std::vector<Type*
 
 class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
     public:
-        DodgeballEngine(unsigned int width, unsigned int height);
+        DodgeballEngine(
+            unsigned int width, unsigned int height, bool serverMode);
         ~DodgeballEngine();
 
         void setupScene();
@@ -39,9 +51,12 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
 
     private:
         /* Administrative stuff */
-        bool m_quit;
+        bool m_quit, m_serverMode;
         bool m_keyStates[irr::KEY_KEY_CODES_COUNT];
         void handleKeyEvents();
+
+        /* network systems */
+        NetBase     *m_netEngine = NULL;
 
         /* window dimensions */
         unsigned int    m_windowWidth;
@@ -63,6 +78,12 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         irr::ITimer                     *m_timer        = NULL;
         irr::gui::ICursorControl        *m_cursorCtrl   = NULL;
         irr::gui::IGUIEnvironment       *m_guiEnv       = NULL;
+
+        /* GUI elements */
+        irr::gui::IGUIWindow        *m_guiConnectWindow     = NULL;
+        irr::gui::IGUIButton        *m_guiConnectButton     = NULL;
+        irr::gui::IGUIEditBox       *m_guiServerAddrField   = NULL;
+        irr::gui::IGUIStaticText    *m_guiStatusText        = NULL;
 
         /* Bullet stuph... */
         btBroadphaseInterface               *m_broadphase       = NULL;

@@ -21,6 +21,9 @@
 #define PLAYER_ACTIVE   20
 #define PLAYER_OUT      21
 
+/* Networking module */
+#define NTWK_ACTIVE  30
+
 class StateMachineBase {
     public:
         virtual unsigned int getState() const;
