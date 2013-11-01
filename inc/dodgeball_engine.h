@@ -20,13 +20,6 @@
 /* Port to operate on */
 #define DODGEBALL_NET_PORT 4538
 
-/* GUI Enums */
-enum {
-    GUI_ID_CONNECT_BUTTON = 101,
-    GUI_ID_CONNECT_WINDOW,
-    GUI_ID_REGISTER_WINDOW
-};
-
 irr::core::vector3df RodriguesRotate(
     irr::core::vector3df input, irr::core::vector3df axis, double rad);
 
@@ -41,7 +34,8 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         void setupScene();
         void buildCourt();
         void clearScene();
-        bool setupNetwork();
+        bool setupNetwork(std::string server);
+        bool registerUser(std::string username);
         void run();
         void updatePhysics(double timestep);
         void updateHUD();

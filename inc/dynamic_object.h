@@ -60,6 +60,15 @@ class WallNode : public DynamicObject {
         virtual ~WallNode();
 };
 
+const std::string PLAYER_MODEL_PATHS[] = {
+    "models/players/hotdog/hotdog.b3d",
+    "models/players/banana/banana.b3d",
+    "models/players/blackhat/blackhat.b3d",
+    "models/players/phil/phil.b3d",
+    "models/players/popsicle/popsicle.b3d",
+    "models/players/snowman/snowman.b3d"
+};
+
 class AvatarNode : public DynamicObject {
     public:
         enum TeamType {

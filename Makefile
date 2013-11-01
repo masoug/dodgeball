@@ -5,8 +5,8 @@ OBJ_DIR	:=	obj
 SRC_DIR	:=	src
 
 TARGET 	:= 	dodgeball
-SRCS	:= 	main.cpp dodgeball_engine.cpp dynamic_object.cpp state_machine.cpp networking.cpp
-OBJS	:= 	$(SRCS:.cpp=.o)
+SRCS	:= 	main.cpp dodgeball_engine.cpp dynamic_object.cpp state_machine.cpp networking.cpp messages.pb.cpp
+OBJS	:= 	$(SRCS:.cpp=.o) 
 OBJS	:=	$(patsubst %, $(OBJ_DIR)/%, $(OBJS))
 
 INC		:= 	-I$(INC_DIR) -I/usr/include/bullet -I/usr/include/irrlicht -I/usr/include/google -I/usr/include/OpenThreads

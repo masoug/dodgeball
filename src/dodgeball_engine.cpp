@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <math.h>
+#include <unistd.h>
 
 #include "dodgeball_engine.h"
 
@@ -57,32 +58,6 @@ DodgeballEngine::DodgeballEngine(
     m_scenemgr = m_device->getSceneManager();
     m_guiEnv = m_device->getGUIEnvironment();
     
-    /* Setup gui stuff */
-    irr::gui::IGUISkin *guiSkin = m_guiEnv->getSkin();
-    irr::gui::IGUIFont *guiFont = m_guiEnv->getFont("models/font.bmp");
-    if (guiFont)
-        guiSkin->setFont(guiFont);
-    m_guiEnv->addButton(
-        irr::core::rect<irr::s32>(10, 40, 200, 70), NULL,
-        GUI_ID_CONNECT_WINDOW, L"Connect to Server");
-    m_guiConnectWindow = m_guiEnv->addWindow(
-        irr::core::rect<irr::s32>(120, 80, 120+240, 190),
-        true, L"Connect to server...");
-    m_guiEnv->addStaticText(
-        L"Server address:", irr::core::rect<irr::s32>(10, 40, 110, 60),
-        false, false, m_guiConnectWindow);
-    m_guiServerAddrField = m_guiEnv->addEditBox(
-        L"localhost", irr::core::rect<irr::s32>(115, 37, 215, 57), 
-        false, m_guiConnectWindow);
-    m_guiConnectButton = m_guiEnv->addButton(
-        irr::core::rect<irr::s32>(70, 70, 160, 90),
-        m_guiConnectWindow, GUI_ID_CONNECT_BUTTON, L"Connect!");
-    m_guiStatusText = m_guiEnv->addStaticText(
-        L"Hello! Please connect to a server!",
-        irr::core::rect<irr::s32>(10, 10, 630, 30), true, true);
-    m_guiConnectWindow->setVisible(false);
-
-
     /* TODO: Sometime in the future make a better FPS camera */
     m_camera = m_scenemgr->addCameraSceneNodeFPS(0, 100, 0.001);
     m_camera->setNearValue((irr::f32)0.001);
@@ -240,20 +215,38 @@ void DodgeballEngine::clearScene() {
     std::cout << "Done clearing scene." << std::endl;
 }
 
-bool DodgeballEngine::setupNetwork() {
-        
-    /* run a simple loop to query the user for connection params. */
-    while(m_device->run() && m_driver) {
-        if (m_device->isWindowActive()) {
-            m_driver->beginScene(
-                true, true, irr::video::SColor(0, 200, 200, 200));
-            m_guiEnv->drawAll();
-            m_driver->endScene();
-        } else {
-            m_device->yield();
-        }
+bool DodgeballEngine::setupNetwork(std::string server) {
+    std::cout << "\n\nSETUP NETWORK\n\n" << std::endl;
+    if (m_serverMode) {
+        /* do server operations */
+        DodgeballServer *server = (DodgeballServer*)m_netEngine;
+        server->start();
+        std::cout << "\n\n\nWaiting for you to start game:" << std::endl;
+        std::string response;
+        std::cin >> response;
+        if (response == "start") {
+            std::cout << "LETS GO!" << std::endl;
+            return false;
+        } else
+            return false;
+    } else {
+        /* do client operations */
+        DodgeballClient *client = (DodgeballClient*)m_netEngine;
+        std::cout 
+            << "Connecting to " << server 
+            << " at port " << DODGEBALL_NET_PORT
+            << std::endl;
+        return client->connect(server, DODGEBALL_NET_PORT);
     }
     return false;
+}
+
+bool DodgeballEngine::registerUser(std::string username) {
+    if (m_serverMode)
+        return false;
+
+    DodgeballClient *client = (DodgeballClient*)m_netEngine;
+    return client->playerRequest(username);
 }
 
 void DodgeballEngine::run() {
@@ -321,8 +314,6 @@ void DodgeballEngine::updateHUD() {
 bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
     /* handle events */
     if (event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
-        if (getState() != DGBENG_RUNNING)
-            return false;
         switch(event.MouseInput.Event)
         {
         case irr::EMIE_LMOUSE_PRESSED_DOWN:
@@ -339,39 +330,7 @@ bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
         }
     } else if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
         m_keyStates[event.KeyInput.Key] = event.KeyInput.PressedDown;
-    } else if (event.EventType == irr::EET_GUI_EVENT) {
-        /* Get id of thingy that sent event */
-        irr::s32 id = event.GUIEvent.Caller->getID();
-
-        switch (event.GUIEvent.EventType) {
-            case irr::gui::EGET_BUTTON_CLICKED:
-                switch(id) {
-                    case GUI_ID_CONNECT_BUTTON:
-                    {
-                        const wchar_t *wcstring =
-                            m_guiServerAddrField->getText();
-                        char addr[(wcslen(wcstring)+1)*sizeof(wchar_t)];
-                        wcstombs(addr, wcstring, sizeof(addr));
-                        std::cout << addr << std::endl;
-                        //m_guiConnectButton->setText(L"Connecting...");
-                        //m_guiConnectButton->setEnabled(false);
-                        m_guiConnectWindow->setVisible(false);
-                        m_guiStatusText->setText(L"Connecting...");
-                        return true;
-                        break;
-                    }
-                    case GUI_ID_CONNECT_WINDOW:
-                        m_guiConnectWindow->setVisible(true);
-                        break;
-                    default:
-                        return false;
-                        break;
-                }
-            default:
-                return false;
-                break;
-        }
-    }
+    } 
     return false;
 }
 
@@ -391,8 +350,11 @@ void DodgeballEngine::handleKeyEvents() {
     else
         m_thisPlayer->setLateral(0.0);
 
-    if (m_keyStates[irr::KEY_KEY_Q] ||m_keyStates[irr::KEY_ESCAPE])
+    if (m_keyStates[irr::KEY_KEY_Q] ||m_keyStates[irr::KEY_ESCAPE]) {
         m_quit = true;
+        /* Stop network engine */
+        m_netEngine->gracefulStop();
+    }
 }
 
 void DodgeballEngine::trackCamera(int x, int y) {
@@ -422,8 +384,7 @@ void DodgeballEngine::trackCamera(int x, int y) {
 
 DodgeballEngine::~DodgeballEngine() {
     std::cout << "Stopping engine..." << std::endl;
-    /* Stop network engine */
-    m_netEngine->gracefulStop();
+    
 
     /* Bye bye Bullet! */
     FREE(m_dynamicsWorld)

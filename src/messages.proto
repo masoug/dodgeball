@@ -1,0 +1,47 @@
+package NetProtocol;
+
+message Vector3 {
+    required double x = 1;
+    required double y = 2;
+    required double z = 3;
+}
+
+message PlayerRequest {
+    required string name = 1;
+}
+
+message PlayerConfirmation {
+    required uint32 id = 1;
+    required uint32 avatar = 2;
+}
+
+message PlayerState {
+    required uint32 id = 1;
+    required Vector3 position = 2;
+    required uint32 possesion = 3;
+    required Vector3 targetVelocity = 4;
+    required uint32 avatar = 5;
+    required string name = 6;
+}
+
+message GameState {
+    repeated PlayerState player_state = 1;
+}
+
+message Error {
+    required uint32 errorCode = 1;
+    required string errorMsg = 2;
+}
+
+message NetPacket {
+    enum Type {
+        VECTOR3 = 1; PLAYER_REQUEST = 2; PLAYER_CONFIRMATION = 3; ERROR = 4;
+    }
+
+    required Type type = 1;
+
+    optional Vector3 vector3 = 2;
+    optional PlayerRequest player_request = 3;
+    optional PlayerConfirmation player_confirmation = 4;
+    optional Error error = 5;
+}
