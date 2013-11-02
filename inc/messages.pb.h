@@ -315,27 +315,17 @@ class PlayerConfirmation : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 id() const;
   inline void set_id(::google::protobuf::uint32 value);
 
-  // required uint32 avatar = 2;
-  inline bool has_avatar() const;
-  inline void clear_avatar();
-  static const int kAvatarFieldNumber = 2;
-  inline ::google::protobuf::uint32 avatar() const;
-  inline void set_avatar(::google::protobuf::uint32 value);
-
   // @@protoc_insertion_point(class_scope:NetProtocol.PlayerConfirmation)
  private:
   inline void set_has_id();
   inline void clear_has_id();
-  inline void set_has_avatar();
-  inline void clear_has_avatar();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint32 id_;
-  ::google::protobuf::uint32 avatar_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_messages_2eproto();
   friend void protobuf_AssignDesc_messages_2eproto();
@@ -994,28 +984,6 @@ inline ::google::protobuf::uint32 PlayerConfirmation::id() const {
 inline void PlayerConfirmation::set_id(::google::protobuf::uint32 value) {
   set_has_id();
   id_ = value;
-}
-
-// required uint32 avatar = 2;
-inline bool PlayerConfirmation::has_avatar() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void PlayerConfirmation::set_has_avatar() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void PlayerConfirmation::clear_has_avatar() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void PlayerConfirmation::clear_avatar() {
-  avatar_ = 0u;
-  clear_has_avatar();
-}
-inline ::google::protobuf::uint32 PlayerConfirmation::avatar() const {
-  return avatar_;
-}
-inline void PlayerConfirmation::set_avatar(::google::protobuf::uint32 value) {
-  set_has_avatar();
-  avatar_ = value;
 }
 
 // -------------------------------------------------------------------

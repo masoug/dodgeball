@@ -21,13 +21,7 @@ const std::string NET_ERROR_CODES[] = {
 };
 
 /* Convenience methods */
-NetProtocol::Vector3* newVector3(double x, double y, double z) {
-    NetProtocol::Vector3 *result = new NetProtocol::Vector3;
-    result->set_x(x);
-    result->set_y(y);
-    result->set_z(z);
-    return result;
-}
+NetProtocol::Vector3* NewVector3(double x, double y, double z);
 
 class NetBase : public OpenThreads::Thread, public StateMachineBase {
     public:
@@ -82,8 +76,11 @@ class DodgeballClient : public NetBase {
         virtual void onReceive();
         void gracefulStop();
 
+        int getPlayerID() const;
+
     protected:
         bool m_connected;
+        int m_playerID;
         ENetPeer *m_server = NULL;
 };
 

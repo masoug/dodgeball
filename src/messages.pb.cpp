@@ -85,9 +85,8 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PlayerRequest));
   PlayerConfirmation_descriptor_ = file->message_type(2);
-  static const int PlayerConfirmation_offsets_[2] = {
+  static const int PlayerConfirmation_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerConfirmation, id_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerConfirmation, avatar_),
   };
   PlayerConfirmation_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -227,23 +226,23 @@ void protobuf_AddDesc_messages_2eproto() {
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\016messages.proto\022\013NetProtocol\"*\n\007Vector3"
     "\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030\002 \002(\001\022\t\n\001z\030\003 \002(\001\"\035\n\rPla"
-    "yerRequest\022\014\n\004name\030\001 \002(\t\"0\n\022PlayerConfir"
-    "mation\022\n\n\002id\030\001 \002(\r\022\016\n\006avatar\030\002 \002(\r\"\240\001\n\013P"
-    "layerState\022\n\n\002id\030\001 \002(\r\022&\n\010position\030\002 \002(\013"
-    "2\024.NetProtocol.Vector3\022\021\n\tpossesion\030\003 \002("
-    "\r\022,\n\016targetVelocity\030\004 \002(\0132\024.NetProtocol."
-    "Vector3\022\016\n\006avatar\030\005 \002(\r\022\014\n\004name\030\006 \002(\t\";\n"
-    "\tGameState\022.\n\014player_state\030\001 \003(\0132\030.NetPr"
-    "otocol.PlayerState\",\n\005Error\022\021\n\terrorCode"
-    "\030\001 \002(\r\022\020\n\010errorMsg\030\002 \002(\t\"\277\002\n\tNetPacket\022)"
-    "\n\004type\030\001 \002(\0162\033.NetProtocol.NetPacket.Typ"
-    "e\022%\n\007vector3\030\002 \001(\0132\024.NetProtocol.Vector3"
-    "\0222\n\016player_request\030\003 \001(\0132\032.NetProtocol.P"
-    "layerRequest\022<\n\023player_confirmation\030\004 \001("
-    "\0132\037.NetProtocol.PlayerConfirmation\022!\n\005er"
-    "ror\030\005 \001(\0132\022.NetProtocol.Error\"K\n\004Type\022\013\n"
-    "\007VECTOR3\020\001\022\022\n\016PLAYER_REQUEST\020\002\022\027\n\023PLAYER"
-    "_CONFIRMATION\020\003\022\t\n\005ERROR\020\004", 746);
+    "yerRequest\022\014\n\004name\030\001 \002(\t\" \n\022PlayerConfir"
+    "mation\022\n\n\002id\030\001 \002(\r\"\240\001\n\013PlayerState\022\n\n\002id"
+    "\030\001 \002(\r\022&\n\010position\030\002 \002(\0132\024.NetProtocol.V"
+    "ector3\022\021\n\tpossesion\030\003 \002(\r\022,\n\016targetVeloc"
+    "ity\030\004 \002(\0132\024.NetProtocol.Vector3\022\016\n\006avata"
+    "r\030\005 \002(\r\022\014\n\004name\030\006 \002(\t\";\n\tGameState\022.\n\014pl"
+    "ayer_state\030\001 \003(\0132\030.NetProtocol.PlayerSta"
+    "te\",\n\005Error\022\021\n\terrorCode\030\001 \002(\r\022\020\n\010errorM"
+    "sg\030\002 \002(\t\"\277\002\n\tNetPacket\022)\n\004type\030\001 \002(\0162\033.N"
+    "etProtocol.NetPacket.Type\022%\n\007vector3\030\002 \001"
+    "(\0132\024.NetProtocol.Vector3\0222\n\016player_reque"
+    "st\030\003 \001(\0132\032.NetProtocol.PlayerRequest\022<\n\023"
+    "player_confirmation\030\004 \001(\0132\037.NetProtocol."
+    "PlayerConfirmation\022!\n\005error\030\005 \001(\0132\022.NetP"
+    "rotocol.Error\"K\n\004Type\022\013\n\007VECTOR3\020\001\022\022\n\016PL"
+    "AYER_REQUEST\020\002\022\027\n\023PLAYER_CONFIRMATION\020\003\022"
+    "\t\n\005ERROR\020\004", 730);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages.proto", &protobuf_RegisterTypes);
   Vector3::default_instance_ = new Vector3();
@@ -783,7 +782,6 @@ void PlayerRequest::Swap(PlayerRequest* other) {
 
 #ifndef _MSC_VER
 const int PlayerConfirmation::kIdFieldNumber;
-const int PlayerConfirmation::kAvatarFieldNumber;
 #endif  // !_MSC_VER
 
 PlayerConfirmation::PlayerConfirmation()
@@ -803,7 +801,6 @@ PlayerConfirmation::PlayerConfirmation(const PlayerConfirmation& from)
 void PlayerConfirmation::SharedCtor() {
   _cached_size_ = 0;
   id_ = 0u;
-  avatar_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -840,7 +837,6 @@ PlayerConfirmation* PlayerConfirmation::New() const {
 void PlayerConfirmation::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     id_ = 0u;
-    avatar_ = 0u;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -860,22 +856,6 @@ bool PlayerConfirmation::MergePartialFromCodedStream(
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &id_)));
           set_has_id();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(16)) goto parse_avatar;
-        break;
-      }
-
-      // required uint32 avatar = 2;
-      case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_avatar:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &avatar_)));
-          set_has_avatar();
         } else {
           goto handle_uninterpreted;
         }
@@ -906,11 +886,6 @@ void PlayerConfirmation::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->id(), output);
   }
 
-  // required uint32 avatar = 2;
-  if (has_avatar()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->avatar(), output);
-  }
-
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -922,11 +897,6 @@ void PlayerConfirmation::SerializeWithCachedSizes(
   // required uint32 id = 1;
   if (has_id()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->id(), target);
-  }
-
-  // required uint32 avatar = 2;
-  if (has_avatar()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->avatar(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -945,13 +915,6 @@ int PlayerConfirmation::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->id());
-    }
-
-    // required uint32 avatar = 2;
-    if (has_avatar()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->avatar());
     }
 
   }
@@ -984,9 +947,6 @@ void PlayerConfirmation::MergeFrom(const PlayerConfirmation& from) {
     if (from.has_id()) {
       set_id(from.id());
     }
-    if (from.has_avatar()) {
-      set_avatar(from.avatar());
-    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -1004,7 +964,7 @@ void PlayerConfirmation::CopyFrom(const PlayerConfirmation& from) {
 }
 
 bool PlayerConfirmation::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
 
   return true;
 }
@@ -1012,7 +972,6 @@ bool PlayerConfirmation::IsInitialized() const {
 void PlayerConfirmation::Swap(PlayerConfirmation* other) {
   if (other != this) {
     std::swap(id_, other->id_);
-    std::swap(avatar_, other->avatar_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

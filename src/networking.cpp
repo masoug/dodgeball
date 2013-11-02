@@ -3,6 +3,15 @@
 
 #include "networking.h"
 
+/* Convenience methods */
+NetProtocol::Vector3* NewVector3(double x, double y, double z) {
+    NetProtocol::Vector3 *result = new NetProtocol::Vector3;
+    result->set_x(x);
+    result->set_y(y);
+    result->set_z(z);
+    return result;
+}
+
 NetBase::NetBase() : m_run(true) {
     /* stop thred from running */
     if (enet_initialize() != 0) {
@@ -146,7 +155,7 @@ void DodgeballServer::hdlPlayerRequest(
 
     /* construct a reponse */
     /* already six players? */
-    if (m_gameState.player_state_size() >= 6) {
+    if (m_gameState.player_state_size() >= 0) {
         sendError(m_event.peer, 0);
         return;
     }
@@ -163,16 +172,15 @@ void DodgeballServer::hdlPlayerRequest(
     /* Add new player state to game state */
     NetProtocol::PlayerState *newPlayer = m_gameState.add_player_state();
     newPlayer->set_id(m_gameState.player_state_size());
-    newPlayer->set_allocated_position(newVector3(0.0, 0.0, 0.0));
+    newPlayer->set_allocated_position(NewVector3(0.0, 0.0, 0.0));
     newPlayer->set_possesion(3);
-    newPlayer->set_allocated_targetvelocity(newVector3(0.0, 0.0, 0.0));
+    newPlayer->set_allocated_targetvelocity(NewVector3(0.0, 0.0, 0.0));
     newPlayer->set_avatar(0);
     newPlayer->set_name(playerRequest.name());
     /* Send player confirmation */
     NetProtocol::PlayerConfirmation *confirmation = 
         new NetProtocol::PlayerConfirmation;
     confirmation->set_id(m_gameState.player_state_size());
-    confirmation->set_avatar(0);
 
     NetProtocol::NetPacket packet;
     packet.set_type(NetProtocol::NetPacket::PLAYER_CONFIRMATION);
@@ -204,6 +212,7 @@ bool DodgeballClient::connect(std::string address, unsigned short port) {
         return true;
     } else {
         std::cerr << "Connection timed out!" << std::endl;
+        std::cerr << "Try restarting the program." << std::endl;
         return false;
     }
     return false;
@@ -235,10 +244,35 @@ bool DodgeballClient::playerRequest(std::string username) {
     if (enet_host_service(m_enetHost, &m_event, 3000) > 0 &&
         m_event.type == ENET_EVENT_TYPE_RECEIVE)
     {
-        std::cout << "Server responded!" << std::endl;
+        std::cout << "Server response:" << std::endl;
+        NetProtocol::NetPacket response;
+        if (!response.ParseFromArray(
+            m_event.packet->data, m_event.packet->dataLength))
+        {
+            std::cerr << "Malformed packet!" << std::endl;
+            enet_packet_destroy(m_event.packet);
+            return false;
+        }
+        
+        /* handle possible responses from server */
+        switch (response.type()) {
+            case NetProtocol::NetPacket::PLAYER_CONFIRMATION:
+                m_playerID = response.player_confirmation().id();
+                break;
+            case NetProtocol::NetPacket::ERROR:
+                std::cout << "ERROR: " << 
+                    response.error().DebugString() << std::endl;
+                return false;
+                break;
+            default:
+                return false;
+                break;
+        }
+        enet_packet_destroy(m_event.packet);
         return true;
     } else {
         std::cerr << "Player request timeout!" << std::endl;
+        std::cerr << "Try restarting the program." << std::endl;
         return false;
     }
     return false;
@@ -281,3 +315,8 @@ void DodgeballClient::gracefulStop() {
     }
     m_server = NULL;
 }
+
+int DodgeballClient::getPlayerID() const {
+    return m_playerID;
+}
+
