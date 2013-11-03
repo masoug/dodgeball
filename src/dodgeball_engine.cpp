@@ -100,6 +100,9 @@ DodgeballNode* DodgeballEngine::addDodgeball(btVector3 pos) {
 }
 
 void DodgeballEngine::fireDodgeball() {
+    if (m_serverMode)
+        return;
+
     /* get camera transform */
     irr::core::vector3df pos = m_camera->getAbsolutePosition();
     irr::core::vector3df target = m_camera->getTarget();
