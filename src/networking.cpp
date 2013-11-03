@@ -82,6 +82,11 @@ void NetBase::sendPacket(
     enet_peer_send(peer, channel, enetPkt);
 }
 
+NetProtocol::GameState NetBase::getGameState() {
+    SLOCK(m_dataLock)
+    return NetProtocol::GameState(*m_gameState);
+}
+
 NetBase::~NetBase() {
     enet_host_destroy(m_enetHost);
     enet_deinitialize();
@@ -409,6 +414,7 @@ bool DodgeballClient::waitForConfirmation(unsigned int timeout_ms) {
     }
     return true;
 }
+
 
 int DodgeballClient::getPlayerID() {
     SLOCK(m_dataLock)

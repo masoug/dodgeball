@@ -42,6 +42,9 @@ class NetBase : public OpenThreads::Thread, public StateMachineBase {
         virtual void sendPacket(
             NetProtocol::NetPacket &packet, ENetPeer *peer,
             unsigned int channel);
+        
+        /* getters and setters */
+        NetProtocol::GameState getGameState();
 
     protected:
         bool m_run;
@@ -85,7 +88,8 @@ class DodgeballClient : public NetBase {
         bool waitForConnection(unsigned int timeout_ms);
         bool waitForInitialState();
         bool waitForConfirmation(unsigned int timeout_ms);
-
+        
+        /* getter/setter functions */
         int getPlayerID();
 
     protected:

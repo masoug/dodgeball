@@ -62,6 +62,7 @@ DodgeballEngine::DodgeballEngine(
     m_camera = m_scenemgr->addCameraSceneNodeFPS(0, 100, 0.001);
     m_camera->setNearValue((irr::f32)0.001);
     m_camera->bindTargetAndRotation(true);
+    m_camera->setPosition(irr::core::vector3df(0.0, 7.0, 0.0));
     m_camera->setTarget(irr::core::vector3df(0.0, 0.0, 0.0));
     m_camera->setUpVector(irr::core::vector3df(0.0, 1.0, 0.0));
 
@@ -202,25 +203,36 @@ void DodgeballEngine::loadPlayers() {
     /* Create player */
 
     /* build scene graph based on game state */
-
-    /* Main camera the player is on */
-    m_thisPlayer = new CameraAvatar(
-        m_device, m_dynamicsWorld, m_camera,
-        btVector3(0.0, 1.0, 2.5), AvatarNode::BLUE, 0);
-    //m_thisPlayer->setTargetVelocity(btVector3(0.0, 0.0, -2.0));
-    m_thisPlayer->stop();
-    m_players.push_back(m_thisPlayer);
-
-    m_players.push_back(new AvatarNode(
-        m_device, m_dynamicsWorld, 
-        btVector3(2.5, 0.855, -2.5), AvatarNode::RED,
-        "models/players/hotdog/hotdog.b3d", 1));
-   //m_hotdog = new AvatarNode(
-   //     m_device, m_dynamicsWorld, 
-   //     btVector3(0.0, 0.35, -2.5), AvatarNode::HOTDOG);
-   //m_banana = new AvatarNode(
-   //     m_device, m_dynamicsWorld, 
-   //     btVector3(-2.5, 0.35, -2.5), AvatarNode::BANANA);
+    unsigned int myID = -1;
+    if (!m_serverMode)
+        myID = ((DodgeballClient*)m_netEngine)->getPlayerID();
+    NetProtocol::GameState gstate = m_netEngine->getGameState();
+    for (int i = 0; i < gstate.player_state_size(); i++) {
+        NetProtocol::PlayerState player = gstate.player_state(i);
+        
+        if (!m_serverMode && player.id() == myID) {
+            /* this is me! */
+             m_thisPlayer = new CameraAvatar(
+                m_device, m_dynamicsWorld, m_camera,
+                btVector3(
+                    player.position().x(),
+                    player.position().y(),
+                    player.position().z()),
+                (AvatarNode::TeamType)player.team_type(),
+                myID);
+            m_players.push_back(m_thisPlayer);
+        } else {
+            /* normal player */
+            m_players.push_back(new AvatarNode(
+                m_device, m_dynamicsWorld,
+                btVector3(
+                    player.position().x(),
+                    player.position().y(),
+                    player.position().z()),
+                (AvatarNode::TeamType)player.team_type(),
+                PLAYER_MODEL_PATHS[player.avatar()], player.id()));
+        }
+    }
 }
 
 void DodgeballEngine::clearScene() {
@@ -274,11 +286,6 @@ void DodgeballEngine::run() {
     setState(DGBENG_RUNNING);
     double prevTime = m_timer->getTime();
 
-    /* startup the network stuff */
-    if (m_serverMode) {
-        /* send initial game state */
-    }
-
     /* TODO: Maybe consider putting this loop at the top main()-level ? */
     /* doing so would enforce the "statefulness" of the engine? Also a
      * better coding practice? */
@@ -319,20 +326,22 @@ void DodgeballEngine::updatePhysics(double timestep) {
 void DodgeballEngine::updateHUD() {
     /* Render images and health etc... */
     //m_driver->enableMaterial2D();
-
-    /* Draw crosshairs... */
-    irr::core::rect<irr::s32> windowSize = m_driver->getViewPort();
-    m_driver->draw2DImage(
-        m_driver->getTexture("models/crosshair.png"),
-        irr::core::position2d<irr::s32>((windowSize.getWidth()/2)-64, (windowSize.getHeight()/2)-64),
-        irr::core::rect<irr::s32>(0, 0, 128, 128), 0, irr::video::SColor(255, 255, 255, 255), true);
     
-    /* Draw possessions */
-    for (int ballsRemaining = 0; ballsRemaining < 3; ballsRemaining++)
+    if (!m_serverMode) {
+        /* Draw crosshairs... */
+        irr::core::rect<irr::s32> windowSize = m_driver->getViewPort();
         m_driver->draw2DImage(
-            m_driver->getTexture("models/logo-blue.png"),
-            irr::core::position2d<irr::s32>(70*ballsRemaining+20, 20),
-            irr::core::rect<irr::s32>(0, 0, 64, 64), 0, irr::video::SColor(255, 255, 255, 255), true);
+            m_driver->getTexture("models/crosshair.png"),
+            irr::core::position2d<irr::s32>((windowSize.getWidth()/2)-64, (windowSize.getHeight()/2)-64),
+            irr::core::rect<irr::s32>(0, 0, 128, 128), 0, irr::video::SColor(255, 255, 255, 255), true);
+        
+        /* Draw possessions */
+        for (int ballsRemaining = 0; ballsRemaining < 3; ballsRemaining++)
+            m_driver->draw2DImage(
+                m_driver->getTexture("models/logo-blue.png"),
+                irr::core::position2d<irr::s32>(70*ballsRemaining+20, 20),
+                irr::core::rect<irr::s32>(0, 0, 64, 64), 0, irr::video::SColor(255, 255, 255, 255), true);
+    }
 
     //m_driver->enableMaterial2D(false);
 }
@@ -362,19 +371,21 @@ bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
 
 void DodgeballEngine::handleKeyEvents() {
     /* handle them key events */
-    if (m_keyStates[irr::KEY_KEY_W]) 
-        m_thisPlayer->setForward(-3.0);
-    else if (m_keyStates[irr::KEY_KEY_S])
-        m_thisPlayer->setForward(3.0);
-    else
-        m_thisPlayer->setForward(0.0);
+    if (!m_serverMode) {
+        if (m_keyStates[irr::KEY_KEY_W]) 
+            m_thisPlayer->setForward(-3.0);
+        else if (m_keyStates[irr::KEY_KEY_S])
+            m_thisPlayer->setForward(3.0);
+        else
+            m_thisPlayer->setForward(0.0);
 
-    if (m_keyStates[irr::KEY_KEY_A])
-        m_thisPlayer->setLateral(3.0);
-    else if (m_keyStates[irr::KEY_KEY_D])
-        m_thisPlayer->setLateral(-3.0);
-    else
-        m_thisPlayer->setLateral(0.0);
+        if (m_keyStates[irr::KEY_KEY_A])
+            m_thisPlayer->setLateral(3.0);
+        else if (m_keyStates[irr::KEY_KEY_D])
+            m_thisPlayer->setLateral(-3.0);
+        else
+            m_thisPlayer->setLateral(0.0);
+    }
 
     if (m_keyStates[irr::KEY_KEY_Q] ||m_keyStates[irr::KEY_ESCAPE]) {
         m_quit = true;
@@ -384,6 +395,8 @@ void DodgeballEngine::handleKeyEvents() {
 }
 
 void DodgeballEngine::trackCamera(int x, int y) {
+    if (m_serverMode)
+        return;
     /* rotate camera... */
     irr::core::rect<irr::s32> windowSize = m_driver->getViewPort();
     int centerx = x - (windowSize.getWidth()/2);
