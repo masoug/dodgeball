@@ -10,9 +10,14 @@
 #include <enet/enet.h>
 #include <Thread>
 #include <Mutex>
+#include <ScopedLock>
 
 #include "state_machine.h"
 #include "messages.pb.h"
+#include "dynamic_object.h"
+
+/* Thread locking mechanism */
+#define SLOCK(_mutex) OpenThreads::ScopedLock<OpenThreads::Mutex> __lock(_mutex);
 
 /* Protocol error codes */
 const std::string NET_ERROR_CODES[] = {
@@ -43,6 +48,9 @@ class NetBase : public OpenThreads::Thread, public StateMachineBase {
         ENetAddress  m_address;
         ENetHost    *m_enetHost;
         ENetEvent    m_event;
+        NetProtocol::GameState *m_gameState;
+        OpenThreads::Mutex  m_dataLock;
+        OpenThreads::Mutex  m_hostLock;
 };
 
 class DodgeballServer : public NetBase {
@@ -51,16 +59,13 @@ class DodgeballServer : public NetBase {
         virtual void onConnect();
         virtual void onReceive();
         virtual void onDisconnect();
+        void sendGameState();
         
         /* handlers */
         void hdlPlayerRequest(
             const NetProtocol::PlayerRequest &playerRequest);
         
         virtual ~DodgeballServer();
-
-    private:
-        /* This is the *master* game state! */
-        NetProtocol::GameState m_gameState;
 };
 
 class DodgeballClient : public NetBase {
@@ -69,19 +74,25 @@ class DodgeballClient : public NetBase {
         virtual ~DodgeballClient();
 
         bool connect(std::string address, unsigned short port);
-        bool isConnected() const;
-        bool playerRequest(std::string username);
+        bool isConnected();
+        void playerRequest(std::string username);
         virtual void onConnect();
         virtual void onDisconnect();
         virtual void onReceive();
         void gracefulStop();
 
-        int getPlayerID() const;
+        /* yielding calls */
+        bool waitForConnection(unsigned int timeout_ms);
+        bool waitForInitialState();
+        bool waitForConfirmation(unsigned int timeout_ms);
+
+        int getPlayerID();
 
     protected:
         bool m_connected;
         int m_playerID;
         ENetPeer *m_server = NULL;
+        NetProtocol::Error *m_errorPacket;
 };
 
 #endif

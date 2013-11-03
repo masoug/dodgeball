@@ -100,13 +100,14 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PlayerConfirmation));
   PlayerState_descriptor_ = file->message_type(3);
-  static const int PlayerState_offsets_[6] = {
+  static const int PlayerState_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerState, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerState, position_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerState, possesion_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerState, targetvelocity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerState, avatar_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerState, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerState, team_type_),
   };
   PlayerState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -120,8 +121,10 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PlayerState));
   GameState_descriptor_ = file->message_type(4);
-  static const int GameState_offsets_[1] = {
+  static const int GameState_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameState, player_state_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameState, redpoints_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameState, bluepoints_),
   };
   GameState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -151,12 +154,13 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Error));
   NetPacket_descriptor_ = file->message_type(6);
-  static const int NetPacket_offsets_[5] = {
+  static const int NetPacket_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, vector3_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, player_request_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, player_confirmation_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, game_state_),
   };
   NetPacket_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -227,22 +231,25 @@ void protobuf_AddDesc_messages_2eproto() {
     "\n\016messages.proto\022\013NetProtocol\"*\n\007Vector3"
     "\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030\002 \002(\001\022\t\n\001z\030\003 \002(\001\"\035\n\rPla"
     "yerRequest\022\014\n\004name\030\001 \002(\t\" \n\022PlayerConfir"
-    "mation\022\n\n\002id\030\001 \002(\r\"\240\001\n\013PlayerState\022\n\n\002id"
+    "mation\022\n\n\002id\030\001 \002(\r\"\263\001\n\013PlayerState\022\n\n\002id"
     "\030\001 \002(\r\022&\n\010position\030\002 \002(\0132\024.NetProtocol.V"
     "ector3\022\021\n\tpossesion\030\003 \002(\r\022,\n\016targetVeloc"
     "ity\030\004 \002(\0132\024.NetProtocol.Vector3\022\016\n\006avata"
-    "r\030\005 \002(\r\022\014\n\004name\030\006 \002(\t\";\n\tGameState\022.\n\014pl"
-    "ayer_state\030\001 \003(\0132\030.NetProtocol.PlayerSta"
-    "te\",\n\005Error\022\021\n\terrorCode\030\001 \002(\r\022\020\n\010errorM"
-    "sg\030\002 \002(\t\"\277\002\n\tNetPacket\022)\n\004type\030\001 \002(\0162\033.N"
-    "etProtocol.NetPacket.Type\022%\n\007vector3\030\002 \001"
-    "(\0132\024.NetProtocol.Vector3\0222\n\016player_reque"
-    "st\030\003 \001(\0132\032.NetProtocol.PlayerRequest\022<\n\023"
-    "player_confirmation\030\004 \001(\0132\037.NetProtocol."
-    "PlayerConfirmation\022!\n\005error\030\005 \001(\0132\022.NetP"
-    "rotocol.Error\"K\n\004Type\022\013\n\007VECTOR3\020\001\022\022\n\016PL"
-    "AYER_REQUEST\020\002\022\027\n\023PLAYER_CONFIRMATION\020\003\022"
-    "\t\n\005ERROR\020\004", 730);
+    "r\030\005 \002(\r\022\014\n\004name\030\006 \002(\t\022\021\n\tteam_type\030\007 \002(\r"
+    "\"b\n\tGameState\022.\n\014player_state\030\001 \003(\0132\030.Ne"
+    "tProtocol.PlayerState\022\021\n\tredPoints\030\002 \002(\r"
+    "\022\022\n\nbluePoints\030\003 \002(\r\",\n\005Error\022\021\n\terrorCo"
+    "de\030\001 \002(\r\022\020\n\010errorMsg\030\002 \002(\t\"\373\002\n\tNetPacket"
+    "\022)\n\004type\030\001 \002(\0162\033.NetProtocol.NetPacket.T"
+    "ype\022%\n\007vector3\030\002 \001(\0132\024.NetProtocol.Vecto"
+    "r3\0222\n\016player_request\030\003 \001(\0132\032.NetProtocol"
+    ".PlayerRequest\022<\n\023player_confirmation\030\004 "
+    "\001(\0132\037.NetProtocol.PlayerConfirmation\022!\n\005"
+    "error\030\005 \001(\0132\022.NetProtocol.Error\022*\n\ngame_"
+    "state\030\006 \001(\0132\026.NetProtocol.GameState\"[\n\004T"
+    "ype\022\013\n\007VECTOR3\020\001\022\022\n\016PLAYER_REQUEST\020\002\022\027\n\023"
+    "PLAYER_CONFIRMATION\020\003\022\t\n\005ERROR\020\004\022\016\n\nGAME"
+    "_STATE\020\005", 848);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages.proto", &protobuf_RegisterTypes);
   Vector3::default_instance_ = new Vector3();
@@ -996,6 +1003,7 @@ const int PlayerState::kPossesionFieldNumber;
 const int PlayerState::kTargetVelocityFieldNumber;
 const int PlayerState::kAvatarFieldNumber;
 const int PlayerState::kNameFieldNumber;
+const int PlayerState::kTeamTypeFieldNumber;
 #endif  // !_MSC_VER
 
 PlayerState::PlayerState()
@@ -1022,6 +1030,7 @@ void PlayerState::SharedCtor() {
   targetvelocity_ = NULL;
   avatar_ = 0u;
   name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  team_type_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1076,6 +1085,7 @@ void PlayerState::Clear() {
         name_->clear();
       }
     }
+    team_type_ = 0u;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -1175,6 +1185,22 @@ bool PlayerState::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(56)) goto parse_team_type;
+        break;
+      }
+
+      // required uint32 team_type = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_team_type:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &team_type_)));
+          set_has_team_type();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -1233,6 +1259,11 @@ void PlayerState::SerializeWithCachedSizes(
       6, this->name(), output);
   }
 
+  // required uint32 team_type = 7;
+  if (has_team_type()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(7, this->team_type(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1278,6 +1309,11 @@ void PlayerState::SerializeWithCachedSizes(
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         6, this->name(), target);
+  }
+
+  // required uint32 team_type = 7;
+  if (has_team_type()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(7, this->team_type(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -1333,6 +1369,13 @@ int PlayerState::ByteSize() const {
           this->name());
     }
 
+    // required uint32 team_type = 7;
+    if (has_team_type()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->team_type());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -1378,6 +1421,9 @@ void PlayerState::MergeFrom(const PlayerState& from) {
     if (from.has_name()) {
       set_name(from.name());
     }
+    if (from.has_team_type()) {
+      set_team_type(from.team_type());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -1395,7 +1441,7 @@ void PlayerState::CopyFrom(const PlayerState& from) {
 }
 
 bool PlayerState::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000003f) != 0x0000003f) return false;
+  if ((_has_bits_[0] & 0x0000007f) != 0x0000007f) return false;
 
   if (has_position()) {
     if (!this->position().IsInitialized()) return false;
@@ -1414,6 +1460,7 @@ void PlayerState::Swap(PlayerState* other) {
     std::swap(targetvelocity_, other->targetvelocity_);
     std::swap(avatar_, other->avatar_);
     std::swap(name_, other->name_);
+    std::swap(team_type_, other->team_type_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -1433,6 +1480,8 @@ void PlayerState::Swap(PlayerState* other) {
 
 #ifndef _MSC_VER
 const int GameState::kPlayerStateFieldNumber;
+const int GameState::kRedPointsFieldNumber;
+const int GameState::kBluePointsFieldNumber;
 #endif  // !_MSC_VER
 
 GameState::GameState()
@@ -1451,6 +1500,8 @@ GameState::GameState(const GameState& from)
 
 void GameState::SharedCtor() {
   _cached_size_ = 0;
+  redpoints_ = 0u;
+  bluepoints_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1485,6 +1536,10 @@ GameState* GameState::New() const {
 }
 
 void GameState::Clear() {
+  if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
+    redpoints_ = 0u;
+    bluepoints_ = 0u;
+  }
   player_state_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -1507,6 +1562,38 @@ bool GameState::MergePartialFromCodedStream(
           goto handle_uninterpreted;
         }
         if (input->ExpectTag(10)) goto parse_player_state;
+        if (input->ExpectTag(16)) goto parse_redPoints;
+        break;
+      }
+
+      // required uint32 redPoints = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_redPoints:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &redpoints_)));
+          set_has_redpoints();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_bluePoints;
+        break;
+      }
+
+      // required uint32 bluePoints = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_bluePoints:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &bluepoints_)));
+          set_has_bluepoints();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -1535,6 +1622,16 @@ void GameState::SerializeWithCachedSizes(
       1, this->player_state(i), output);
   }
 
+  // required uint32 redPoints = 2;
+  if (has_redpoints()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->redpoints(), output);
+  }
+
+  // required uint32 bluePoints = 3;
+  if (has_bluepoints()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->bluepoints(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1550,6 +1647,16 @@ void GameState::SerializeWithCachedSizes(
         1, this->player_state(i), target);
   }
 
+  // required uint32 redPoints = 2;
+  if (has_redpoints()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->redpoints(), target);
+  }
+
+  // required uint32 bluePoints = 3;
+  if (has_bluepoints()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->bluepoints(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -1560,6 +1667,22 @@ void GameState::SerializeWithCachedSizes(
 int GameState::ByteSize() const {
   int total_size = 0;
 
+  if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
+    // required uint32 redPoints = 2;
+    if (has_redpoints()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->redpoints());
+    }
+
+    // required uint32 bluePoints = 3;
+    if (has_bluepoints()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->bluepoints());
+    }
+
+  }
   // repeated .NetProtocol.PlayerState player_state = 1;
   total_size += 1 * this->player_state_size();
   for (int i = 0; i < this->player_state_size(); i++) {
@@ -1594,6 +1717,14 @@ void GameState::MergeFrom(const ::google::protobuf::Message& from) {
 void GameState::MergeFrom(const GameState& from) {
   GOOGLE_CHECK_NE(&from, this);
   player_state_.MergeFrom(from.player_state_);
+  if (from._has_bits_[1 / 32] & (0xffu << (1 % 32))) {
+    if (from.has_redpoints()) {
+      set_redpoints(from.redpoints());
+    }
+    if (from.has_bluepoints()) {
+      set_bluepoints(from.bluepoints());
+    }
+  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -1610,6 +1741,7 @@ void GameState::CopyFrom(const GameState& from) {
 }
 
 bool GameState::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000006) != 0x00000006) return false;
 
   for (int i = 0; i < player_state_size(); i++) {
     if (!this->player_state(i).IsInitialized()) return false;
@@ -1620,6 +1752,8 @@ bool GameState::IsInitialized() const {
 void GameState::Swap(GameState* other) {
   if (other != this) {
     player_state_.Swap(&other->player_state_);
+    std::swap(redpoints_, other->redpoints_);
+    std::swap(bluepoints_, other->bluepoints_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -1913,6 +2047,7 @@ bool NetPacket_Type_IsValid(int value) {
     case 2:
     case 3:
     case 4:
+    case 5:
       return true;
     default:
       return false;
@@ -1924,6 +2059,7 @@ const NetPacket_Type NetPacket::VECTOR3;
 const NetPacket_Type NetPacket::PLAYER_REQUEST;
 const NetPacket_Type NetPacket::PLAYER_CONFIRMATION;
 const NetPacket_Type NetPacket::ERROR;
+const NetPacket_Type NetPacket::GAME_STATE;
 const NetPacket_Type NetPacket::Type_MIN;
 const NetPacket_Type NetPacket::Type_MAX;
 const int NetPacket::Type_ARRAYSIZE;
@@ -1934,6 +2070,7 @@ const int NetPacket::kVector3FieldNumber;
 const int NetPacket::kPlayerRequestFieldNumber;
 const int NetPacket::kPlayerConfirmationFieldNumber;
 const int NetPacket::kErrorFieldNumber;
+const int NetPacket::kGameStateFieldNumber;
 #endif  // !_MSC_VER
 
 NetPacket::NetPacket()
@@ -1946,6 +2083,7 @@ void NetPacket::InitAsDefaultInstance() {
   player_request_ = const_cast< ::NetProtocol::PlayerRequest*>(&::NetProtocol::PlayerRequest::default_instance());
   player_confirmation_ = const_cast< ::NetProtocol::PlayerConfirmation*>(&::NetProtocol::PlayerConfirmation::default_instance());
   error_ = const_cast< ::NetProtocol::Error*>(&::NetProtocol::Error::default_instance());
+  game_state_ = const_cast< ::NetProtocol::GameState*>(&::NetProtocol::GameState::default_instance());
 }
 
 NetPacket::NetPacket(const NetPacket& from)
@@ -1961,6 +2099,7 @@ void NetPacket::SharedCtor() {
   player_request_ = NULL;
   player_confirmation_ = NULL;
   error_ = NULL;
+  game_state_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1974,6 +2113,7 @@ void NetPacket::SharedDtor() {
     delete player_request_;
     delete player_confirmation_;
     delete error_;
+    delete game_state_;
   }
 }
 
@@ -2012,6 +2152,9 @@ void NetPacket::Clear() {
     }
     if (has_error()) {
       if (error_ != NULL) error_->::NetProtocol::Error::Clear();
+    }
+    if (has_game_state()) {
+      if (game_state_ != NULL) game_state_->::NetProtocol::GameState::Clear();
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -2096,6 +2239,20 @@ bool NetPacket::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(50)) goto parse_game_state;
+        break;
+      }
+
+      // optional .NetProtocol.GameState game_state = 6;
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_game_state:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_game_state()));
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -2148,6 +2305,12 @@ void NetPacket::SerializeWithCachedSizes(
       5, this->error(), output);
   }
 
+  // optional .NetProtocol.GameState game_state = 6;
+  if (has_game_state()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      6, this->game_state(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -2188,6 +2351,13 @@ void NetPacket::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         5, this->error(), target);
+  }
+
+  // optional .NetProtocol.GameState game_state = 6;
+  if (has_game_state()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        6, this->game_state(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -2235,6 +2405,13 @@ int NetPacket::ByteSize() const {
           this->error());
     }
 
+    // optional .NetProtocol.GameState game_state = 6;
+    if (has_game_state()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->game_state());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -2277,6 +2454,9 @@ void NetPacket::MergeFrom(const NetPacket& from) {
     if (from.has_error()) {
       mutable_error()->::NetProtocol::Error::MergeFrom(from.error());
     }
+    if (from.has_game_state()) {
+      mutable_game_state()->::NetProtocol::GameState::MergeFrom(from.game_state());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -2308,6 +2488,9 @@ bool NetPacket::IsInitialized() const {
   if (has_error()) {
     if (!this->error().IsInitialized()) return false;
   }
+  if (has_game_state()) {
+    if (!this->game_state().IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -2318,6 +2501,7 @@ void NetPacket::Swap(NetPacket* other) {
     std::swap(player_request_, other->player_request_);
     std::swap(player_confirmation_, other->player_confirmation_);
     std::swap(error_, other->error_);
+    std::swap(game_state_, other->game_state_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

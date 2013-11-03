@@ -46,11 +46,12 @@ enum NetPacket_Type {
   NetPacket_Type_VECTOR3 = 1,
   NetPacket_Type_PLAYER_REQUEST = 2,
   NetPacket_Type_PLAYER_CONFIRMATION = 3,
-  NetPacket_Type_ERROR = 4
+  NetPacket_Type_ERROR = 4,
+  NetPacket_Type_GAME_STATE = 5
 };
 bool NetPacket_Type_IsValid(int value);
 const NetPacket_Type NetPacket_Type_Type_MIN = NetPacket_Type_VECTOR3;
-const NetPacket_Type NetPacket_Type_Type_MAX = NetPacket_Type_ERROR;
+const NetPacket_Type NetPacket_Type_Type_MAX = NetPacket_Type_GAME_STATE;
 const int NetPacket_Type_Type_ARRAYSIZE = NetPacket_Type_Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* NetPacket_Type_descriptor();
@@ -441,6 +442,13 @@ class PlayerState : public ::google::protobuf::Message {
   inline ::std::string* release_name();
   inline void set_allocated_name(::std::string* name);
 
+  // required uint32 team_type = 7;
+  inline bool has_team_type() const;
+  inline void clear_team_type();
+  static const int kTeamTypeFieldNumber = 7;
+  inline ::google::protobuf::uint32 team_type() const;
+  inline void set_team_type(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:NetProtocol.PlayerState)
  private:
   inline void set_has_id();
@@ -455,6 +463,8 @@ class PlayerState : public ::google::protobuf::Message {
   inline void clear_has_avatar();
   inline void set_has_name();
   inline void clear_has_name();
+  inline void set_has_team_type();
+  inline void clear_has_team_type();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -464,9 +474,10 @@ class PlayerState : public ::google::protobuf::Message {
   ::NetProtocol::Vector3* targetvelocity_;
   ::std::string* name_;
   ::google::protobuf::uint32 avatar_;
+  ::google::protobuf::uint32 team_type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_messages_2eproto();
   friend void protobuf_AssignDesc_messages_2eproto();
@@ -543,15 +554,35 @@ class GameState : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::NetProtocol::PlayerState >*
       mutable_player_state();
 
+  // required uint32 redPoints = 2;
+  inline bool has_redpoints() const;
+  inline void clear_redpoints();
+  static const int kRedPointsFieldNumber = 2;
+  inline ::google::protobuf::uint32 redpoints() const;
+  inline void set_redpoints(::google::protobuf::uint32 value);
+
+  // required uint32 bluePoints = 3;
+  inline bool has_bluepoints() const;
+  inline void clear_bluepoints();
+  static const int kBluePointsFieldNumber = 3;
+  inline ::google::protobuf::uint32 bluepoints() const;
+  inline void set_bluepoints(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:NetProtocol.GameState)
  private:
+  inline void set_has_redpoints();
+  inline void clear_has_redpoints();
+  inline void set_has_bluepoints();
+  inline void clear_has_bluepoints();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::NetProtocol::PlayerState > player_state_;
+  ::google::protobuf::uint32 redpoints_;
+  ::google::protobuf::uint32 bluepoints_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_messages_2eproto();
   friend void protobuf_AssignDesc_messages_2eproto();
@@ -716,6 +747,7 @@ class NetPacket : public ::google::protobuf::Message {
   static const Type PLAYER_REQUEST = NetPacket_Type_PLAYER_REQUEST;
   static const Type PLAYER_CONFIRMATION = NetPacket_Type_PLAYER_CONFIRMATION;
   static const Type ERROR = NetPacket_Type_ERROR;
+  static const Type GAME_STATE = NetPacket_Type_GAME_STATE;
   static inline bool Type_IsValid(int value) {
     return NetPacket_Type_IsValid(value);
   }
@@ -782,6 +814,15 @@ class NetPacket : public ::google::protobuf::Message {
   inline ::NetProtocol::Error* release_error();
   inline void set_allocated_error(::NetProtocol::Error* error);
 
+  // optional .NetProtocol.GameState game_state = 6;
+  inline bool has_game_state() const;
+  inline void clear_game_state();
+  static const int kGameStateFieldNumber = 6;
+  inline const ::NetProtocol::GameState& game_state() const;
+  inline ::NetProtocol::GameState* mutable_game_state();
+  inline ::NetProtocol::GameState* release_game_state();
+  inline void set_allocated_game_state(::NetProtocol::GameState* game_state);
+
   // @@protoc_insertion_point(class_scope:NetProtocol.NetPacket)
  private:
   inline void set_has_type();
@@ -794,6 +835,8 @@ class NetPacket : public ::google::protobuf::Message {
   inline void clear_has_player_confirmation();
   inline void set_has_error();
   inline void clear_has_error();
+  inline void set_has_game_state();
+  inline void clear_has_game_state();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -801,10 +844,11 @@ class NetPacket : public ::google::protobuf::Message {
   ::NetProtocol::PlayerRequest* player_request_;
   ::NetProtocol::PlayerConfirmation* player_confirmation_;
   ::NetProtocol::Error* error_;
+  ::NetProtocol::GameState* game_state_;
   int type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_messages_2eproto();
   friend void protobuf_AssignDesc_messages_2eproto();
@@ -1202,6 +1246,28 @@ inline void PlayerState::set_allocated_name(::std::string* name) {
   }
 }
 
+// required uint32 team_type = 7;
+inline bool PlayerState::has_team_type() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void PlayerState::set_has_team_type() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void PlayerState::clear_has_team_type() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void PlayerState::clear_team_type() {
+  team_type_ = 0u;
+  clear_has_team_type();
+}
+inline ::google::protobuf::uint32 PlayerState::team_type() const {
+  return team_type_;
+}
+inline void PlayerState::set_team_type(::google::protobuf::uint32 value) {
+  set_has_team_type();
+  team_type_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // GameState
@@ -1229,6 +1295,50 @@ GameState::player_state() const {
 inline ::google::protobuf::RepeatedPtrField< ::NetProtocol::PlayerState >*
 GameState::mutable_player_state() {
   return &player_state_;
+}
+
+// required uint32 redPoints = 2;
+inline bool GameState::has_redpoints() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void GameState::set_has_redpoints() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void GameState::clear_has_redpoints() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void GameState::clear_redpoints() {
+  redpoints_ = 0u;
+  clear_has_redpoints();
+}
+inline ::google::protobuf::uint32 GameState::redpoints() const {
+  return redpoints_;
+}
+inline void GameState::set_redpoints(::google::protobuf::uint32 value) {
+  set_has_redpoints();
+  redpoints_ = value;
+}
+
+// required uint32 bluePoints = 3;
+inline bool GameState::has_bluepoints() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void GameState::set_has_bluepoints() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void GameState::clear_has_bluepoints() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void GameState::clear_bluepoints() {
+  bluepoints_ = 0u;
+  clear_has_bluepoints();
+}
+inline ::google::protobuf::uint32 GameState::bluepoints() const {
+  return bluepoints_;
+}
+inline void GameState::set_bluepoints(::google::protobuf::uint32 value) {
+  set_has_bluepoints();
+  bluepoints_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -1503,6 +1613,44 @@ inline void NetPacket::set_allocated_error(::NetProtocol::Error* error) {
     set_has_error();
   } else {
     clear_has_error();
+  }
+}
+
+// optional .NetProtocol.GameState game_state = 6;
+inline bool NetPacket::has_game_state() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void NetPacket::set_has_game_state() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void NetPacket::clear_has_game_state() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void NetPacket::clear_game_state() {
+  if (game_state_ != NULL) game_state_->::NetProtocol::GameState::Clear();
+  clear_has_game_state();
+}
+inline const ::NetProtocol::GameState& NetPacket::game_state() const {
+  return game_state_ != NULL ? *game_state_ : *default_instance_->game_state_;
+}
+inline ::NetProtocol::GameState* NetPacket::mutable_game_state() {
+  set_has_game_state();
+  if (game_state_ == NULL) game_state_ = new ::NetProtocol::GameState;
+  return game_state_;
+}
+inline ::NetProtocol::GameState* NetPacket::release_game_state() {
+  clear_has_game_state();
+  ::NetProtocol::GameState* temp = game_state_;
+  game_state_ = NULL;
+  return temp;
+}
+inline void NetPacket::set_allocated_game_state(::NetProtocol::GameState* game_state) {
+  delete game_state_;
+  game_state_ = game_state;
+  if (game_state) {
+    set_has_game_state();
+  } else {
+    clear_has_game_state();
   }
 }
 

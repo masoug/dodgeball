@@ -147,8 +147,8 @@ AvatarNode::AvatarNode(
     btDiscreteDynamicsWorld *world,
     btVector3 initPos,
     TeamType team,
-    std::string fileName) :
-    m_targetVel(0.0, 0.0, 0.0)
+    std::string fileName, int playerID) :
+    m_playerID(playerID), m_targetVel(0.0, 0.0, 0.0)
 {
     m_teamType = team;
 
@@ -271,6 +271,10 @@ void AvatarNode::applyControlLoop() {
     //    << output.getZ() << std::endl;
 }
 
+int AvatarNode::getPlayerID() const {
+    return m_playerID;
+}
+
 AvatarNode::~AvatarNode() {
     /* dtor */
     std::cout << "DROP PLAYA" << std::endl;
@@ -282,8 +286,8 @@ CameraAvatar::CameraAvatar(
     btDiscreteDynamicsWorld *world,
     irr::scene::ICameraSceneNode *camera,
     btVector3 initPos,
-    TeamType team) :
-    AvatarNode(device, world, initPos, team, "NULL")
+    TeamType team, int playerID) :
+    AvatarNode(device, world, initPos, team, "NULL", playerID)
 {
     m_sceneNode = camera;
     
@@ -323,8 +327,9 @@ void CameraAvatar::applyTransform() {
         if (pos.getZ() < 0.0)
             std::cout << "CROSSED CENTER LINE!!!" << std::endl;
     }
-
-    m_rigidBody->activate(); //Bullet deactivates bodies that have zero velocity
+    
+    //Bullet deactivates bodies that have zero velocity
+    m_rigidBody->activate();
 }
 
 CameraAvatar::~CameraAvatar() {

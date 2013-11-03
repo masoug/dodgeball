@@ -116,29 +116,6 @@ void DodgeballEngine::fireDodgeball() {
     ball->throwBall(btVector3(imp.X, imp.Y, imp.Z));
 }
 
-void DodgeballEngine::loadPlayers() {
-    /* Create player */
-
-    /* Main camera the player is on */
-    m_thisPlayer = new CameraAvatar(
-        m_device, m_dynamicsWorld, m_camera,
-        btVector3(0.0, 1.0, 2.5), AvatarNode::BLUE);
-    //m_thisPlayer->setTargetVelocity(btVector3(0.0, 0.0, -2.0));
-    m_thisPlayer->stop();
-    m_players.push_back(m_thisPlayer);
-
-    m_players.push_back(new AvatarNode(
-        m_device, m_dynamicsWorld, 
-        btVector3(2.5, 0.855, -2.5), AvatarNode::RED,
-        "models/players/hotdog/hotdog.b3d"));
-   //m_hotdog = new AvatarNode(
-   //     m_device, m_dynamicsWorld, 
-   //     btVector3(0.0, 0.35, -2.5), AvatarNode::HOTDOG);
-   //m_banana = new AvatarNode(
-   //     m_device, m_dynamicsWorld, 
-   //     btVector3(-2.5, 0.35, -2.5), AvatarNode::BANANA);
-}
-
 void DodgeballEngine::handleCollisions() {
     /* Handle them contact manifolds */
     int numManifolds = m_dynamicsWorld->getDispatcher()->getNumManifolds();
@@ -153,7 +130,9 @@ void DodgeballEngine::handleCollisions() {
     }
 }
 
-bool DodgeballEngine::checkCollisions(btRigidBody *bodyA, btRigidBody *bodyB) {
+bool DodgeballEngine::checkCollisions(
+    btRigidBody *bodyA, btRigidBody *bodyB)
+{
     /* Check half cases for body a and body b */
     DodgeballNode *ball = fromRigidbody<DodgeballNode>(bodyA, m_dodgeballs);
     if (ball) {
@@ -177,6 +156,25 @@ bool DodgeballEngine::checkCollisions(btRigidBody *bodyA, btRigidBody *bodyB) {
 void DodgeballEngine::setupScene() {
     /* Build the court and add players */
     buildCourt();
+
+    /* load players accordingly */
+    if (m_serverMode) {
+        /* server already has game state/player roster
+         * thus it just proceeds to build the scene graph
+         */
+        std::cout << "Building game state..." << std::endl;
+        /* build game state */
+    } else {
+        /* Client must wait for all other players to join and 
+         * for the server to send the game state to everyone
+         */
+        std::cout << "\n\nWaiting for all other players to join\n"
+            << "and for server to send initial game state." << std::endl;
+        
+        DodgeballClient *client = (DodgeballClient*)m_netEngine;
+        while (!client->waitForInitialState())
+            std::cerr << "Server derped out. Trying again..." << std::endl;
+    }
     loadPlayers();
 }
 
@@ -200,6 +198,31 @@ void DodgeballEngine::buildCourt() {
 
 }
 
+void DodgeballEngine::loadPlayers() {
+    /* Create player */
+
+    /* build scene graph based on game state */
+
+    /* Main camera the player is on */
+    m_thisPlayer = new CameraAvatar(
+        m_device, m_dynamicsWorld, m_camera,
+        btVector3(0.0, 1.0, 2.5), AvatarNode::BLUE, 0);
+    //m_thisPlayer->setTargetVelocity(btVector3(0.0, 0.0, -2.0));
+    m_thisPlayer->stop();
+    m_players.push_back(m_thisPlayer);
+
+    m_players.push_back(new AvatarNode(
+        m_device, m_dynamicsWorld, 
+        btVector3(2.5, 0.855, -2.5), AvatarNode::RED,
+        "models/players/hotdog/hotdog.b3d", 1));
+   //m_hotdog = new AvatarNode(
+   //     m_device, m_dynamicsWorld, 
+   //     btVector3(0.0, 0.35, -2.5), AvatarNode::HOTDOG);
+   //m_banana = new AvatarNode(
+   //     m_device, m_dynamicsWorld, 
+   //     btVector3(-2.5, 0.35, -2.5), AvatarNode::BANANA);
+}
+
 void DodgeballEngine::clearScene() {
     std::cout << "Clearing scene..." << std::endl;
     for (unsigned int i = 0; i < m_dodgeballs.size(); i++)
@@ -218,25 +241,22 @@ void DodgeballEngine::clearScene() {
 bool DodgeballEngine::setupNetwork(std::string server) {
     std::cout << "\n\nSETUP NETWORK\n\n" << std::endl;
     if (m_serverMode) {
-        /* do server operations */
-        DodgeballServer *server = (DodgeballServer*)m_netEngine;
-        server->start();
+        /* wait for user to start game */
         std::cout << "\n\n\nWaiting for you to start game:" << std::endl;
         std::string response;
         std::cin >> response;
-        if (response == "start") {
-            std::cout << "LETS GO!" << std::endl;
-            return false;
-        } else
-            return false;
+        while (response != "start") { std::cin >> response; }
+        ((DodgeballServer*)m_netEngine)->sendGameState();
+        return true;
     } else {
-        /* do client operations */
+        /* connect to server */
         DodgeballClient *client = (DodgeballClient*)m_netEngine;
         std::cout 
             << "Connecting to " << server 
             << " at port " << DODGEBALL_NET_PORT
             << std::endl;
-        return client->connect(server, DODGEBALL_NET_PORT);
+        if (client->connect(server, DODGEBALL_NET_PORT))
+            return client->waitForConnection(3000);
     }
     return false;
 }
@@ -246,12 +266,18 @@ bool DodgeballEngine::registerUser(std::string username) {
         return false;
 
     DodgeballClient *client = (DodgeballClient*)m_netEngine;
-    return client->playerRequest(username);
+    client->playerRequest(username);
+    return client->waitForConfirmation(3000);
 }
 
 void DodgeballEngine::run() {
     setState(DGBENG_RUNNING);
     double prevTime = m_timer->getTime();
+
+    /* startup the network stuff */
+    if (m_serverMode) {
+        /* send initial game state */
+    }
 
     /* TODO: Maybe consider putting this loop at the top main()-level ? */
     /* doing so would enforce the "statefulness" of the engine? Also a

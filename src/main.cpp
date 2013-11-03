@@ -35,15 +35,17 @@ int main(int argc, char **argv) {
     
     /* First ask the player for the network info */
     if (engine.setupNetwork(server)) {
-        /* Register the user with the server */
-        std::string username;
-        std::cout << "\n\nPlease enter a username (no spaces!):" << std::endl;
-        std::cin >> username;
-        while (!engine.registerUser(username)) {
-            std::cout << "Player request failed :( Please try again." << std::endl;
+        if (!serverMode) {
+            /* Register the user with the server */
+            std::string username;
+            std::cout << "\n\nPlease enter a username (no spaces!):" << std::endl;
             std::cin >> username;
+            while (!engine.registerUser(username)) {
+                std::cout << "Player request failed :( Please try again." << std::endl;
+                std::cin >> username;
+            }
+            std::cout << "Hi there " << username << "! Welcome to dodgeball!" << std::endl;
         }
-        std::cout << "Hi there " << username << "! Welcome to dodgeball!" << std::endl;
         
         /* Then set up the scene */
         engine.setupScene();
@@ -51,7 +53,7 @@ int main(int argc, char **argv) {
         /* Enter the main simulation loop. */
         engine.run();
     } else {
-        std::cerr << "Failed to set up networking! Check your settings again!" << std::endl;
+        std::cerr << "Failed to set up networking! Check your settings!" << std::endl;
     }
 
     /* Once we're done... */

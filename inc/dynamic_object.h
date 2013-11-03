@@ -79,8 +79,8 @@ class AvatarNode : public DynamicObject {
             irr::IrrlichtDevice *device,
             btDiscreteDynamicsWorld *world,
             btVector3 initPos,
-            TeamType team,
-            std::string fileName);
+            TeamType team, std::string fileName,
+            int playerID);
         virtual ~AvatarNode();
         
         virtual void boop(); // hit by ball
@@ -90,8 +90,10 @@ class AvatarNode : public DynamicObject {
         void stop();
         virtual void applyTransform();
         virtual void applyControlLoop();
+        int getPlayerID() const;
 
     protected:
+        int m_playerID;
         irr::scene::IAnimatedMesh  *m_animatedMesh = NULL;
         TeamType                    m_teamType;
         btVector3                   m_targetVel;
@@ -104,7 +106,7 @@ class CameraAvatar : public AvatarNode {
             btDiscreteDynamicsWorld *world,
             irr::scene::ICameraSceneNode *camera,
             btVector3 initPos,
-            TeamType team);
+            TeamType team, int playerID);
         virtual ~CameraAvatar();
         virtual void applyTransform();
 };
