@@ -66,7 +66,7 @@ void NetBase::sendError(ENetPeer *peer, unsigned int errCode) {
     error->set_errormsg(NET_ERROR_CODES[errCode]);
 
     NetProtocol::NetPacket packet;
-    packet.set_type(NetProtocol::NetPacket::ERROR);
+    packet.set_type(NetProtocol::NetPacket::ERROR_PKT);
     packet.set_allocated_error(error);
     sendPacket(packet, peer, 0);
 }
@@ -322,7 +322,7 @@ void DodgeballClient::onReceive() {
             std::cout << "\n\nGAMESTATE:\n"
                 << m_gameState->DebugString() << std::endl;
         }
-        case NetProtocol::NetPacket::ERROR:
+        case NetProtocol::NetPacket::ERROR_PKT:
         {
             SLOCK(m_dataLock);
             m_errorPacket = response.release_error();

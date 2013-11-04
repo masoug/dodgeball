@@ -1,0 +1,32 @@
+# Makefile for building dodgeball
+
+INC_DIR	:=	inc
+OBJ_DIR	:=	obj
+SRC_DIR	:=	src
+
+TARGET 	:= 	dodgeball.exe
+SRCS	:= 	main.cpp dodgeball_engine.cpp dynamic_object.cpp state_machine.cpp networking.cpp messages.pb.cpp
+OBJS	:= 	$(SRCS:.cpp=.o) 
+OBJS	:=	$(patsubst %, $(OBJ_DIR)/%, $(OBJS))
+
+INC		:= 	-I$(INC_DIR) -Ibullet -Iirrlicht/include -Ienet/include -Iprotobuf -Iopen_threads -Iopen_threads/OpenThreads
+CCFLAGS	:= 	-Wall $(INC) -static -static-libgcc -static-libstdc++
+LDFLAGS	:= 	
+LIBS	:= 	irrlicht/libIrrlicht.a bullet/libBulletDynamics.a bullet/libBulletCollision.a bullet/libLinearMath.a enet/libenet.a protobuf/libprotobuf.a open_threads/libOpenThreads.a -lwsock32 -lwinmm -lws2_32
+#LIBS	:= 	-lIrrlicht -lBulletDynamics -lBulletCollision -lLinearMath -lenet -lprotobuf -lOpenThreads
+
+CC		:= 	i686-w64-mingw32-g++
+
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp 
+	$(CC) $(CCFLAGS) -o $@ -c $<
+
+clean::
+	rm -rf $(OBJ_DIR)/*.o $(TARGET)
+
+distclean:: clean

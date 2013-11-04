@@ -37,7 +37,7 @@ message Error {
 
 message NetPacket {
     enum Type {
-        VECTOR3 = 1; PLAYER_REQUEST = 2; PLAYER_CONFIRMATION = 3; ERROR = 4;
+        VECTOR3 = 1; PLAYER_REQUEST = 2; PLAYER_CONFIRMATION = 3; ERROR_PKT = 4;
         GAME_STATE = 5;
     }
 

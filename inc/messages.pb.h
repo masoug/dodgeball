@@ -46,7 +46,7 @@ enum NetPacket_Type {
   NetPacket_Type_VECTOR3 = 1,
   NetPacket_Type_PLAYER_REQUEST = 2,
   NetPacket_Type_PLAYER_CONFIRMATION = 3,
-  NetPacket_Type_ERROR = 4,
+  NetPacket_Type_ERROR_PKT = 4,
   NetPacket_Type_GAME_STATE = 5
 };
 bool NetPacket_Type_IsValid(int value);
@@ -746,7 +746,7 @@ class NetPacket : public ::google::protobuf::Message {
   static const Type VECTOR3 = NetPacket_Type_VECTOR3;
   static const Type PLAYER_REQUEST = NetPacket_Type_PLAYER_REQUEST;
   static const Type PLAYER_CONFIRMATION = NetPacket_Type_PLAYER_CONFIRMATION;
-  static const Type ERROR = NetPacket_Type_ERROR;
+  static const Type ERROR_PKT = NetPacket_Type_ERROR_PKT;
   static const Type GAME_STATE = NetPacket_Type_GAME_STATE;
   static inline bool Type_IsValid(int value) {
     return NetPacket_Type_IsValid(value);

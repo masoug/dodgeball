@@ -239,17 +239,17 @@ void protobuf_AddDesc_messages_2eproto() {
     "\"b\n\tGameState\022.\n\014player_state\030\001 \003(\0132\030.Ne"
     "tProtocol.PlayerState\022\021\n\tredPoints\030\002 \002(\r"
     "\022\022\n\nbluePoints\030\003 \002(\r\",\n\005Error\022\021\n\terrorCo"
-    "de\030\001 \002(\r\022\020\n\010errorMsg\030\002 \002(\t\"\373\002\n\tNetPacket"
+    "de\030\001 \002(\r\022\020\n\010errorMsg\030\002 \002(\t\"\377\002\n\tNetPacket"
     "\022)\n\004type\030\001 \002(\0162\033.NetProtocol.NetPacket.T"
     "ype\022%\n\007vector3\030\002 \001(\0132\024.NetProtocol.Vecto"
     "r3\0222\n\016player_request\030\003 \001(\0132\032.NetProtocol"
     ".PlayerRequest\022<\n\023player_confirmation\030\004 "
     "\001(\0132\037.NetProtocol.PlayerConfirmation\022!\n\005"
     "error\030\005 \001(\0132\022.NetProtocol.Error\022*\n\ngame_"
-    "state\030\006 \001(\0132\026.NetProtocol.GameState\"[\n\004T"
+    "state\030\006 \001(\0132\026.NetProtocol.GameState\"_\n\004T"
     "ype\022\013\n\007VECTOR3\020\001\022\022\n\016PLAYER_REQUEST\020\002\022\027\n\023"
-    "PLAYER_CONFIRMATION\020\003\022\t\n\005ERROR\020\004\022\016\n\nGAME"
-    "_STATE\020\005", 848);
+    "PLAYER_CONFIRMATION\020\003\022\r\n\tERROR_PKT\020\004\022\016\n\n"
+    "GAME_STATE\020\005", 852);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages.proto", &protobuf_RegisterTypes);
   Vector3::default_instance_ = new Vector3();
@@ -2058,7 +2058,7 @@ bool NetPacket_Type_IsValid(int value) {
 const NetPacket_Type NetPacket::VECTOR3;
 const NetPacket_Type NetPacket::PLAYER_REQUEST;
 const NetPacket_Type NetPacket::PLAYER_CONFIRMATION;
-const NetPacket_Type NetPacket::ERROR;
+const NetPacket_Type NetPacket::ERROR_PKT;
 const NetPacket_Type NetPacket::GAME_STATE;
 const NetPacket_Type NetPacket::Type_MIN;
 const NetPacket_Type NetPacket::Type_MAX;
