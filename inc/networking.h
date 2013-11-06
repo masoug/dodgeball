@@ -67,6 +67,8 @@ class DodgeballServer : public NetBase {
         /* handlers */
         void hdlPlayerRequest(
             const NetProtocol::PlayerRequest &playerRequest);
+        void hdlPlayerAction(
+            const NetProtocol::PlayerAction &playerAction);
         
         virtual ~DodgeballServer();
 };
@@ -83,6 +85,8 @@ class DodgeballClient : public NetBase {
         virtual void onDisconnect();
         virtual void onReceive();
         void gracefulStop();
+        void sendPlayerAction(
+            const NetProtocol::PlayerAction &paction);
 
         /* yielding calls */
         bool waitForConnection(unsigned int timeout_ms);

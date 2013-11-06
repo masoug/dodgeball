@@ -38,6 +38,7 @@ class Vector3;
 class PlayerRequest;
 class PlayerConfirmation;
 class PlayerState;
+class PlayerAction;
 class GameState;
 class Error;
 class NetPacket;
@@ -46,12 +47,13 @@ enum NetPacket_Type {
   NetPacket_Type_VECTOR3 = 1,
   NetPacket_Type_PLAYER_REQUEST = 2,
   NetPacket_Type_PLAYER_CONFIRMATION = 3,
-  NetPacket_Type_ERROR = 4,
-  NetPacket_Type_GAME_STATE = 5
+  NetPacket_Type_ERROR_PKT = 4,
+  NetPacket_Type_GAME_STATE = 5,
+  NetPacket_Type_PLAYER_ACTION = 6
 };
 bool NetPacket_Type_IsValid(int value);
 const NetPacket_Type NetPacket_Type_Type_MIN = NetPacket_Type_VECTOR3;
-const NetPacket_Type NetPacket_Type_Type_MAX = NetPacket_Type_GAME_STATE;
+const NetPacket_Type NetPacket_Type_Type_MAX = NetPacket_Type_PLAYER_ACTION;
 const int NetPacket_Type_Type_ARRAYSIZE = NetPacket_Type_Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* NetPacket_Type_descriptor();
@@ -488,6 +490,112 @@ class PlayerState : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class PlayerAction : public ::google::protobuf::Message {
+ public:
+  PlayerAction();
+  virtual ~PlayerAction();
+
+  PlayerAction(const PlayerAction& from);
+
+  inline PlayerAction& operator=(const PlayerAction& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PlayerAction& default_instance();
+
+  void Swap(PlayerAction* other);
+
+  // implements Message ----------------------------------------------
+
+  PlayerAction* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PlayerAction& from);
+  void MergeFrom(const PlayerAction& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required uint32 id = 1;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 1;
+  inline ::google::protobuf::uint32 id() const;
+  inline void set_id(::google::protobuf::uint32 value);
+
+  // required .NetProtocol.Vector3 targetVelocity = 2;
+  inline bool has_targetvelocity() const;
+  inline void clear_targetvelocity();
+  static const int kTargetVelocityFieldNumber = 2;
+  inline const ::NetProtocol::Vector3& targetvelocity() const;
+  inline ::NetProtocol::Vector3* mutable_targetvelocity();
+  inline ::NetProtocol::Vector3* release_targetvelocity();
+  inline void set_allocated_targetvelocity(::NetProtocol::Vector3* targetvelocity);
+
+  // required .NetProtocol.Vector3 position = 3;
+  inline bool has_position() const;
+  inline void clear_position();
+  static const int kPositionFieldNumber = 3;
+  inline const ::NetProtocol::Vector3& position() const;
+  inline ::NetProtocol::Vector3* mutable_position();
+  inline ::NetProtocol::Vector3* release_position();
+  inline void set_allocated_position(::NetProtocol::Vector3* position);
+
+  // @@protoc_insertion_point(class_scope:NetProtocol.PlayerAction)
+ private:
+  inline void set_has_id();
+  inline void clear_has_id();
+  inline void set_has_targetvelocity();
+  inline void clear_has_targetvelocity();
+  inline void set_has_position();
+  inline void clear_has_position();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::NetProtocol::Vector3* targetvelocity_;
+  ::NetProtocol::Vector3* position_;
+  ::google::protobuf::uint32 id_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_messages_2eproto();
+  friend void protobuf_AssignDesc_messages_2eproto();
+  friend void protobuf_ShutdownFile_messages_2eproto();
+
+  void InitAsDefaultInstance();
+  static PlayerAction* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class GameState : public ::google::protobuf::Message {
  public:
   GameState();
@@ -746,8 +854,9 @@ class NetPacket : public ::google::protobuf::Message {
   static const Type VECTOR3 = NetPacket_Type_VECTOR3;
   static const Type PLAYER_REQUEST = NetPacket_Type_PLAYER_REQUEST;
   static const Type PLAYER_CONFIRMATION = NetPacket_Type_PLAYER_CONFIRMATION;
-  static const Type ERROR = NetPacket_Type_ERROR;
+  static const Type ERROR_PKT = NetPacket_Type_ERROR_PKT;
   static const Type GAME_STATE = NetPacket_Type_GAME_STATE;
+  static const Type PLAYER_ACTION = NetPacket_Type_PLAYER_ACTION;
   static inline bool Type_IsValid(int value) {
     return NetPacket_Type_IsValid(value);
   }
@@ -823,6 +932,15 @@ class NetPacket : public ::google::protobuf::Message {
   inline ::NetProtocol::GameState* release_game_state();
   inline void set_allocated_game_state(::NetProtocol::GameState* game_state);
 
+  // optional .NetProtocol.PlayerAction player_action = 7;
+  inline bool has_player_action() const;
+  inline void clear_player_action();
+  static const int kPlayerActionFieldNumber = 7;
+  inline const ::NetProtocol::PlayerAction& player_action() const;
+  inline ::NetProtocol::PlayerAction* mutable_player_action();
+  inline ::NetProtocol::PlayerAction* release_player_action();
+  inline void set_allocated_player_action(::NetProtocol::PlayerAction* player_action);
+
   // @@protoc_insertion_point(class_scope:NetProtocol.NetPacket)
  private:
   inline void set_has_type();
@@ -837,6 +955,8 @@ class NetPacket : public ::google::protobuf::Message {
   inline void clear_has_error();
   inline void set_has_game_state();
   inline void clear_has_game_state();
+  inline void set_has_player_action();
+  inline void clear_has_player_action();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -845,10 +965,11 @@ class NetPacket : public ::google::protobuf::Message {
   ::NetProtocol::PlayerConfirmation* player_confirmation_;
   ::NetProtocol::Error* error_;
   ::NetProtocol::GameState* game_state_;
+  ::NetProtocol::PlayerAction* player_action_;
   int type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_messages_2eproto();
   friend void protobuf_AssignDesc_messages_2eproto();
@@ -1270,6 +1391,108 @@ inline void PlayerState::set_team_type(::google::protobuf::uint32 value) {
 
 // -------------------------------------------------------------------
 
+// PlayerAction
+
+// required uint32 id = 1;
+inline bool PlayerAction::has_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void PlayerAction::set_has_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void PlayerAction::clear_has_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void PlayerAction::clear_id() {
+  id_ = 0u;
+  clear_has_id();
+}
+inline ::google::protobuf::uint32 PlayerAction::id() const {
+  return id_;
+}
+inline void PlayerAction::set_id(::google::protobuf::uint32 value) {
+  set_has_id();
+  id_ = value;
+}
+
+// required .NetProtocol.Vector3 targetVelocity = 2;
+inline bool PlayerAction::has_targetvelocity() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void PlayerAction::set_has_targetvelocity() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void PlayerAction::clear_has_targetvelocity() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void PlayerAction::clear_targetvelocity() {
+  if (targetvelocity_ != NULL) targetvelocity_->::NetProtocol::Vector3::Clear();
+  clear_has_targetvelocity();
+}
+inline const ::NetProtocol::Vector3& PlayerAction::targetvelocity() const {
+  return targetvelocity_ != NULL ? *targetvelocity_ : *default_instance_->targetvelocity_;
+}
+inline ::NetProtocol::Vector3* PlayerAction::mutable_targetvelocity() {
+  set_has_targetvelocity();
+  if (targetvelocity_ == NULL) targetvelocity_ = new ::NetProtocol::Vector3;
+  return targetvelocity_;
+}
+inline ::NetProtocol::Vector3* PlayerAction::release_targetvelocity() {
+  clear_has_targetvelocity();
+  ::NetProtocol::Vector3* temp = targetvelocity_;
+  targetvelocity_ = NULL;
+  return temp;
+}
+inline void PlayerAction::set_allocated_targetvelocity(::NetProtocol::Vector3* targetvelocity) {
+  delete targetvelocity_;
+  targetvelocity_ = targetvelocity;
+  if (targetvelocity) {
+    set_has_targetvelocity();
+  } else {
+    clear_has_targetvelocity();
+  }
+}
+
+// required .NetProtocol.Vector3 position = 3;
+inline bool PlayerAction::has_position() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void PlayerAction::set_has_position() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void PlayerAction::clear_has_position() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void PlayerAction::clear_position() {
+  if (position_ != NULL) position_->::NetProtocol::Vector3::Clear();
+  clear_has_position();
+}
+inline const ::NetProtocol::Vector3& PlayerAction::position() const {
+  return position_ != NULL ? *position_ : *default_instance_->position_;
+}
+inline ::NetProtocol::Vector3* PlayerAction::mutable_position() {
+  set_has_position();
+  if (position_ == NULL) position_ = new ::NetProtocol::Vector3;
+  return position_;
+}
+inline ::NetProtocol::Vector3* PlayerAction::release_position() {
+  clear_has_position();
+  ::NetProtocol::Vector3* temp = position_;
+  position_ = NULL;
+  return temp;
+}
+inline void PlayerAction::set_allocated_position(::NetProtocol::Vector3* position) {
+  delete position_;
+  position_ = position;
+  if (position) {
+    set_has_position();
+  } else {
+    clear_has_position();
+  }
+}
+
+// -------------------------------------------------------------------
+
 // GameState
 
 // repeated .NetProtocol.PlayerState player_state = 1;
@@ -1651,6 +1874,44 @@ inline void NetPacket::set_allocated_game_state(::NetProtocol::GameState* game_s
     set_has_game_state();
   } else {
     clear_has_game_state();
+  }
+}
+
+// optional .NetProtocol.PlayerAction player_action = 7;
+inline bool NetPacket::has_player_action() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void NetPacket::set_has_player_action() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void NetPacket::clear_has_player_action() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void NetPacket::clear_player_action() {
+  if (player_action_ != NULL) player_action_->::NetProtocol::PlayerAction::Clear();
+  clear_has_player_action();
+}
+inline const ::NetProtocol::PlayerAction& NetPacket::player_action() const {
+  return player_action_ != NULL ? *player_action_ : *default_instance_->player_action_;
+}
+inline ::NetProtocol::PlayerAction* NetPacket::mutable_player_action() {
+  set_has_player_action();
+  if (player_action_ == NULL) player_action_ = new ::NetProtocol::PlayerAction;
+  return player_action_;
+}
+inline ::NetProtocol::PlayerAction* NetPacket::release_player_action() {
+  clear_has_player_action();
+  ::NetProtocol::PlayerAction* temp = player_action_;
+  player_action_ = NULL;
+  return temp;
+}
+inline void NetPacket::set_allocated_player_action(::NetProtocol::PlayerAction* player_action) {
+  delete player_action_;
+  player_action_ = player_action;
+  if (player_action) {
+    set_has_player_action();
+  } else {
+    clear_has_player_action();
   }
 }
 

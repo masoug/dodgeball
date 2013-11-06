@@ -32,6 +32,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* PlayerState_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   PlayerState_reflection_ = NULL;
+const ::google::protobuf::Descriptor* PlayerAction_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  PlayerAction_reflection_ = NULL;
 const ::google::protobuf::Descriptor* GameState_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GameState_reflection_ = NULL;
@@ -120,7 +123,24 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PlayerState));
-  GameState_descriptor_ = file->message_type(4);
+  PlayerAction_descriptor_ = file->message_type(4);
+  static const int PlayerAction_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerAction, id_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerAction, targetvelocity_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerAction, position_),
+  };
+  PlayerAction_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      PlayerAction_descriptor_,
+      PlayerAction::default_instance_,
+      PlayerAction_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerAction, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerAction, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(PlayerAction));
+  GameState_descriptor_ = file->message_type(5);
   static const int GameState_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameState, player_state_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameState, redpoints_),
@@ -137,7 +157,7 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GameState));
-  Error_descriptor_ = file->message_type(5);
+  Error_descriptor_ = file->message_type(6);
   static const int Error_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Error, errorcode_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Error, errormsg_),
@@ -153,14 +173,15 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Error));
-  NetPacket_descriptor_ = file->message_type(6);
-  static const int NetPacket_offsets_[6] = {
+  NetPacket_descriptor_ = file->message_type(7);
+  static const int NetPacket_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, vector3_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, player_request_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, player_confirmation_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, game_state_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, player_action_),
   };
   NetPacket_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -195,6 +216,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     PlayerState_descriptor_, &PlayerState::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    PlayerAction_descriptor_, &PlayerAction::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GameState_descriptor_, &GameState::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Error_descriptor_, &Error::default_instance());
@@ -213,6 +236,8 @@ void protobuf_ShutdownFile_messages_2eproto() {
   delete PlayerConfirmation_reflection_;
   delete PlayerState::default_instance_;
   delete PlayerState_reflection_;
+  delete PlayerAction::default_instance_;
+  delete PlayerAction_reflection_;
   delete GameState::default_instance_;
   delete GameState_reflection_;
   delete Error::default_instance_;
@@ -236,26 +261,31 @@ void protobuf_AddDesc_messages_2eproto() {
     "ector3\022\021\n\tpossesion\030\003 \002(\r\022,\n\016targetVeloc"
     "ity\030\004 \002(\0132\024.NetProtocol.Vector3\022\016\n\006avata"
     "r\030\005 \002(\r\022\014\n\004name\030\006 \002(\t\022\021\n\tteam_type\030\007 \002(\r"
-    "\"b\n\tGameState\022.\n\014player_state\030\001 \003(\0132\030.Ne"
-    "tProtocol.PlayerState\022\021\n\tredPoints\030\002 \002(\r"
-    "\022\022\n\nbluePoints\030\003 \002(\r\",\n\005Error\022\021\n\terrorCo"
-    "de\030\001 \002(\r\022\020\n\010errorMsg\030\002 \002(\t\"\373\002\n\tNetPacket"
-    "\022)\n\004type\030\001 \002(\0162\033.NetProtocol.NetPacket.T"
-    "ype\022%\n\007vector3\030\002 \001(\0132\024.NetProtocol.Vecto"
-    "r3\0222\n\016player_request\030\003 \001(\0132\032.NetProtocol"
-    ".PlayerRequest\022<\n\023player_confirmation\030\004 "
-    "\001(\0132\037.NetProtocol.PlayerConfirmation\022!\n\005"
-    "error\030\005 \001(\0132\022.NetProtocol.Error\022*\n\ngame_"
-    "state\030\006 \001(\0132\026.NetProtocol.GameState\"[\n\004T"
-    "ype\022\013\n\007VECTOR3\020\001\022\022\n\016PLAYER_REQUEST\020\002\022\027\n\023"
-    "PLAYER_CONFIRMATION\020\003\022\t\n\005ERROR\020\004\022\016\n\nGAME"
-    "_STATE\020\005", 848);
+    "\"p\n\014PlayerAction\022\n\n\002id\030\001 \002(\r\022,\n\016targetVe"
+    "locity\030\002 \002(\0132\024.NetProtocol.Vector3\022&\n\010po"
+    "sition\030\003 \002(\0132\024.NetProtocol.Vector3\"b\n\tGa"
+    "meState\022.\n\014player_state\030\001 \003(\0132\030.NetProto"
+    "col.PlayerState\022\021\n\tredPoints\030\002 \002(\r\022\022\n\nbl"
+    "uePoints\030\003 \002(\r\",\n\005Error\022\021\n\terrorCode\030\001 \002"
+    "(\r\022\020\n\010errorMsg\030\002 \002(\t\"\304\003\n\tNetPacket\022)\n\004ty"
+    "pe\030\001 \002(\0162\033.NetProtocol.NetPacket.Type\022%\n"
+    "\007vector3\030\002 \001(\0132\024.NetProtocol.Vector3\0222\n\016"
+    "player_request\030\003 \001(\0132\032.NetProtocol.Playe"
+    "rRequest\022<\n\023player_confirmation\030\004 \001(\0132\037."
+    "NetProtocol.PlayerConfirmation\022!\n\005error\030"
+    "\005 \001(\0132\022.NetProtocol.Error\022*\n\ngame_state\030"
+    "\006 \001(\0132\026.NetProtocol.GameState\0220\n\rplayer_"
+    "action\030\007 \001(\0132\031.NetProtocol.PlayerAction\""
+    "r\n\004Type\022\013\n\007VECTOR3\020\001\022\022\n\016PLAYER_REQUEST\020\002"
+    "\022\027\n\023PLAYER_CONFIRMATION\020\003\022\r\n\tERROR_PKT\020\004"
+    "\022\016\n\nGAME_STATE\020\005\022\021\n\rPLAYER_ACTION\020\006", 1035);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages.proto", &protobuf_RegisterTypes);
   Vector3::default_instance_ = new Vector3();
   PlayerRequest::default_instance_ = new PlayerRequest();
   PlayerConfirmation::default_instance_ = new PlayerConfirmation();
   PlayerState::default_instance_ = new PlayerState();
+  PlayerAction::default_instance_ = new PlayerAction();
   GameState::default_instance_ = new GameState();
   Error::default_instance_ = new Error();
   NetPacket::default_instance_ = new NetPacket();
@@ -263,6 +293,7 @@ void protobuf_AddDesc_messages_2eproto() {
   PlayerRequest::default_instance_->InitAsDefaultInstance();
   PlayerConfirmation::default_instance_->InitAsDefaultInstance();
   PlayerState::default_instance_->InitAsDefaultInstance();
+  PlayerAction::default_instance_->InitAsDefaultInstance();
   GameState::default_instance_->InitAsDefaultInstance();
   Error::default_instance_->InitAsDefaultInstance();
   NetPacket::default_instance_->InitAsDefaultInstance();
@@ -1479,6 +1510,311 @@ void PlayerState::Swap(PlayerState* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int PlayerAction::kIdFieldNumber;
+const int PlayerAction::kTargetVelocityFieldNumber;
+const int PlayerAction::kPositionFieldNumber;
+#endif  // !_MSC_VER
+
+PlayerAction::PlayerAction()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void PlayerAction::InitAsDefaultInstance() {
+  targetvelocity_ = const_cast< ::NetProtocol::Vector3*>(&::NetProtocol::Vector3::default_instance());
+  position_ = const_cast< ::NetProtocol::Vector3*>(&::NetProtocol::Vector3::default_instance());
+}
+
+PlayerAction::PlayerAction(const PlayerAction& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void PlayerAction::SharedCtor() {
+  _cached_size_ = 0;
+  id_ = 0u;
+  targetvelocity_ = NULL;
+  position_ = NULL;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+PlayerAction::~PlayerAction() {
+  SharedDtor();
+}
+
+void PlayerAction::SharedDtor() {
+  if (this != default_instance_) {
+    delete targetvelocity_;
+    delete position_;
+  }
+}
+
+void PlayerAction::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* PlayerAction::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return PlayerAction_descriptor_;
+}
+
+const PlayerAction& PlayerAction::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_messages_2eproto();
+  return *default_instance_;
+}
+
+PlayerAction* PlayerAction::default_instance_ = NULL;
+
+PlayerAction* PlayerAction::New() const {
+  return new PlayerAction;
+}
+
+void PlayerAction::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    id_ = 0u;
+    if (has_targetvelocity()) {
+      if (targetvelocity_ != NULL) targetvelocity_->::NetProtocol::Vector3::Clear();
+    }
+    if (has_position()) {
+      if (position_ != NULL) position_->::NetProtocol::Vector3::Clear();
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool PlayerAction::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required uint32 id = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &id_)));
+          set_has_id();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_targetVelocity;
+        break;
+      }
+
+      // required .NetProtocol.Vector3 targetVelocity = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_targetVelocity:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_targetvelocity()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(26)) goto parse_position;
+        break;
+      }
+
+      // required .NetProtocol.Vector3 position = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_position:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_position()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void PlayerAction::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required uint32 id = 1;
+  if (has_id()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->id(), output);
+  }
+
+  // required .NetProtocol.Vector3 targetVelocity = 2;
+  if (has_targetvelocity()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->targetvelocity(), output);
+  }
+
+  // required .NetProtocol.Vector3 position = 3;
+  if (has_position()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      3, this->position(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* PlayerAction::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // required uint32 id = 1;
+  if (has_id()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->id(), target);
+  }
+
+  // required .NetProtocol.Vector3 targetVelocity = 2;
+  if (has_targetvelocity()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        2, this->targetvelocity(), target);
+  }
+
+  // required .NetProtocol.Vector3 position = 3;
+  if (has_position()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        3, this->position(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int PlayerAction::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required uint32 id = 1;
+    if (has_id()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->id());
+    }
+
+    // required .NetProtocol.Vector3 targetVelocity = 2;
+    if (has_targetvelocity()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->targetvelocity());
+    }
+
+    // required .NetProtocol.Vector3 position = 3;
+    if (has_position()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->position());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void PlayerAction::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const PlayerAction* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const PlayerAction*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void PlayerAction::MergeFrom(const PlayerAction& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_id()) {
+      set_id(from.id());
+    }
+    if (from.has_targetvelocity()) {
+      mutable_targetvelocity()->::NetProtocol::Vector3::MergeFrom(from.targetvelocity());
+    }
+    if (from.has_position()) {
+      mutable_position()->::NetProtocol::Vector3::MergeFrom(from.position());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void PlayerAction::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void PlayerAction::CopyFrom(const PlayerAction& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool PlayerAction::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
+
+  if (has_targetvelocity()) {
+    if (!this->targetvelocity().IsInitialized()) return false;
+  }
+  if (has_position()) {
+    if (!this->position().IsInitialized()) return false;
+  }
+  return true;
+}
+
+void PlayerAction::Swap(PlayerAction* other) {
+  if (other != this) {
+    std::swap(id_, other->id_);
+    std::swap(targetvelocity_, other->targetvelocity_);
+    std::swap(position_, other->position_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata PlayerAction::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = PlayerAction_descriptor_;
+  metadata.reflection = PlayerAction_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
 const int GameState::kPlayerStateFieldNumber;
 const int GameState::kRedPointsFieldNumber;
 const int GameState::kBluePointsFieldNumber;
@@ -2048,6 +2384,7 @@ bool NetPacket_Type_IsValid(int value) {
     case 3:
     case 4:
     case 5:
+    case 6:
       return true;
     default:
       return false;
@@ -2058,8 +2395,9 @@ bool NetPacket_Type_IsValid(int value) {
 const NetPacket_Type NetPacket::VECTOR3;
 const NetPacket_Type NetPacket::PLAYER_REQUEST;
 const NetPacket_Type NetPacket::PLAYER_CONFIRMATION;
-const NetPacket_Type NetPacket::ERROR;
+const NetPacket_Type NetPacket::ERROR_PKT;
 const NetPacket_Type NetPacket::GAME_STATE;
+const NetPacket_Type NetPacket::PLAYER_ACTION;
 const NetPacket_Type NetPacket::Type_MIN;
 const NetPacket_Type NetPacket::Type_MAX;
 const int NetPacket::Type_ARRAYSIZE;
@@ -2071,6 +2409,7 @@ const int NetPacket::kPlayerRequestFieldNumber;
 const int NetPacket::kPlayerConfirmationFieldNumber;
 const int NetPacket::kErrorFieldNumber;
 const int NetPacket::kGameStateFieldNumber;
+const int NetPacket::kPlayerActionFieldNumber;
 #endif  // !_MSC_VER
 
 NetPacket::NetPacket()
@@ -2084,6 +2423,7 @@ void NetPacket::InitAsDefaultInstance() {
   player_confirmation_ = const_cast< ::NetProtocol::PlayerConfirmation*>(&::NetProtocol::PlayerConfirmation::default_instance());
   error_ = const_cast< ::NetProtocol::Error*>(&::NetProtocol::Error::default_instance());
   game_state_ = const_cast< ::NetProtocol::GameState*>(&::NetProtocol::GameState::default_instance());
+  player_action_ = const_cast< ::NetProtocol::PlayerAction*>(&::NetProtocol::PlayerAction::default_instance());
 }
 
 NetPacket::NetPacket(const NetPacket& from)
@@ -2100,6 +2440,7 @@ void NetPacket::SharedCtor() {
   player_confirmation_ = NULL;
   error_ = NULL;
   game_state_ = NULL;
+  player_action_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -2114,6 +2455,7 @@ void NetPacket::SharedDtor() {
     delete player_confirmation_;
     delete error_;
     delete game_state_;
+    delete player_action_;
   }
 }
 
@@ -2155,6 +2497,9 @@ void NetPacket::Clear() {
     }
     if (has_game_state()) {
       if (game_state_ != NULL) game_state_->::NetProtocol::GameState::Clear();
+    }
+    if (has_player_action()) {
+      if (player_action_ != NULL) player_action_->::NetProtocol::PlayerAction::Clear();
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -2253,6 +2598,20 @@ bool NetPacket::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(58)) goto parse_player_action;
+        break;
+      }
+
+      // optional .NetProtocol.PlayerAction player_action = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_player_action:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_player_action()));
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -2311,6 +2670,12 @@ void NetPacket::SerializeWithCachedSizes(
       6, this->game_state(), output);
   }
 
+  // optional .NetProtocol.PlayerAction player_action = 7;
+  if (has_player_action()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      7, this->player_action(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -2358,6 +2723,13 @@ void NetPacket::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         6, this->game_state(), target);
+  }
+
+  // optional .NetProtocol.PlayerAction player_action = 7;
+  if (has_player_action()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        7, this->player_action(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -2412,6 +2784,13 @@ int NetPacket::ByteSize() const {
           this->game_state());
     }
 
+    // optional .NetProtocol.PlayerAction player_action = 7;
+    if (has_player_action()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->player_action());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -2457,6 +2836,9 @@ void NetPacket::MergeFrom(const NetPacket& from) {
     if (from.has_game_state()) {
       mutable_game_state()->::NetProtocol::GameState::MergeFrom(from.game_state());
     }
+    if (from.has_player_action()) {
+      mutable_player_action()->::NetProtocol::PlayerAction::MergeFrom(from.player_action());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -2491,6 +2873,9 @@ bool NetPacket::IsInitialized() const {
   if (has_game_state()) {
     if (!this->game_state().IsInitialized()) return false;
   }
+  if (has_player_action()) {
+    if (!this->player_action().IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -2502,6 +2887,7 @@ void NetPacket::Swap(NetPacket* other) {
     std::swap(player_confirmation_, other->player_confirmation_);
     std::swap(error_, other->error_);
     std::swap(game_state_, other->game_state_);
+    std::swap(player_action_, other->player_action_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

@@ -20,7 +20,6 @@ NetBase::NetBase() : m_run(true) {
         return;
     }
     
-    start();
     setState(INIT_STATE);
 }
 
@@ -66,7 +65,7 @@ void NetBase::sendError(ENetPeer *peer, unsigned int errCode) {
     error->set_errormsg(NET_ERROR_CODES[errCode]);
 
     NetProtocol::NetPacket packet;
-    packet.set_type(NetProtocol::NetPacket::ERROR);
+    packet.set_type(NetProtocol::NetPacket::ERROR_PKT);
     packet.set_allocated_error(error);
     sendPacket(packet, peer, 0);
 }
@@ -92,6 +91,10 @@ NetBase::~NetBase() {
     enet_deinitialize();
 }
 
+/*
+ * DODGEBALL SERVER
+ */
+
 DodgeballServer::DodgeballServer(unsigned short port) {
     /* Set address */
     m_address.host = ENET_HOST_ANY;
@@ -107,6 +110,8 @@ DodgeballServer::DodgeballServer(unsigned short port) {
     m_gameState = new NetProtocol::GameState;
     m_gameState->set_redpoints(100);
     m_gameState->set_bluepoints(100);
+
+    start();
 }
 
 void DodgeballServer::onConnect() {
@@ -129,6 +134,9 @@ void DodgeballServer::onReceive() {
         case NetProtocol::NetPacket::PLAYER_REQUEST:
             hdlPlayerRequest(netPacket.player_request());
             break;
+        case NetProtocol::NetPacket::PLAYER_ACTION:
+            enet_host_broadcast(m_enetHost, 0, m_event.packet);
+            hdlPlayerAction(netPacket.player_action());
         default:
             break;
     }
@@ -228,6 +236,15 @@ void DodgeballServer::hdlPlayerRequest(
         << newPlayer->DebugString() << "\n\n" << std::endl;
 }
 
+void DodgeballServer::hdlPlayerAction(
+    const NetProtocol::PlayerAction &playerAction)
+{
+    /* apply to my game state */
+    /* the packet has already been broadcasted
+     * to everyone else.
+     */
+}
+
 /*
  * DODGEBALL CLIENT
  */
@@ -244,6 +261,8 @@ DodgeballClient::DodgeballClient() :
 
     m_gameState = NULL;
     m_errorPacket = NULL;
+
+    start();
 }
 
 DodgeballClient::~DodgeballClient() {
@@ -322,7 +341,8 @@ void DodgeballClient::onReceive() {
             std::cout << "\n\nGAMESTATE:\n"
                 << m_gameState->DebugString() << std::endl;
         }
-        case NetProtocol::NetPacket::ERROR:
+            break;
+        case NetProtocol::NetPacket::ERROR_PKT:
         {
             SLOCK(m_dataLock);
             m_errorPacket = response.release_error();
@@ -357,6 +377,15 @@ void DodgeballClient::gracefulStop() {
         enet_peer_reset(m_server);
     }
     m_server = NULL;
+}
+
+void DodgeballClient::sendPlayerAction(const NetProtocol::PlayerAction &paction) {
+    NetProtocol::PlayerAction *ptrAction = new NetProtocol::PlayerAction(paction);
+
+    NetProtocol::NetPacket packet;
+    packet.set_type(NetProtocol::NetPacket::PLAYER_ACTION);
+    packet.set_allocated_player_action(ptrAction);
+    sendPacket(packet, m_server, 0);
 }
 
 bool DodgeballClient::waitForInitialState() {
