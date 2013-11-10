@@ -113,6 +113,11 @@ void DodgeballEngine::fireDodgeball() {
     btVector3 ballPos(pos.X, pos.Y, pos.Z);
     ballPos += btVector3(imp.X, imp.Y, imp.Z) * (0.7);
     imp *= 8.0; // applying an impulse simulates throwing a ball 
+
+    /* send ball spawn signal */
+    ((DodgeballClient*)m_netEngine)->sendSpawnBall(
+        ballPos.x(), ballPos.y(), ballPos.z(),
+        imp.X, imp.Y, imp.Z);
     
     /* Create ball and throw it.
      * we add the ball at the target because we don't want it to collide with myself. */
@@ -293,22 +298,21 @@ void DodgeballEngine::run() {
     /* doing so would enforce the "statefulness" of the engine? Also a
      * better coding practice? */
     while(m_device->run() && m_driver && !m_quit) {
-        if (m_device->isWindowActive()) {
-            /* handle key events */
-            handleKeyEvents();
+        /* handle key events */
+        handleKeyEvents();
 
-            /* update physics stuff */
-            updatePhysics((m_timer->getTime()-prevTime) * 0.001);
-            prevTime = m_timer->getTime();
+        /* handle events from network */
+        handleFieldEvents();
 
-            /* then deal with irrlicht */
-            m_driver->beginScene(true, true, irr::video::SColor(255, 0, 0, 255));
-            m_scenemgr->drawAll();
-            updateHUD();
-            m_driver->endScene();
-        } else {
-            m_device->yield();
-        }
+        /* update physics stuff */
+        updatePhysics((m_timer->getTime()-prevTime) * 0.001);
+        prevTime = m_timer->getTime();
+
+        /* then deal with irrlicht */
+        m_driver->beginScene(true, true, irr::video::SColor(255, 0, 0, 255));
+        m_scenemgr->drawAll();
+        updateHUD();
+        m_driver->endScene();
     }
 }
 
@@ -388,12 +392,76 @@ void DodgeballEngine::handleKeyEvents() {
             m_thisPlayer->setLateral(-3.0);
         else
             m_thisPlayer->setLateral(0.0);
+
+        /* send player events if there is a 
+         * significant change in the user's 
+         * motion */
+        static btVector3 prevTargetVel;
+        btVector3 currVel = m_thisPlayer->getTargetVel();
+        if (currVel.distance(prevTargetVel) >= 0.5) {
+            ((DodgeballClient*)m_netEngine)->sendPlayerEvent(
+                m_thisPlayer->getPlayerID(),
+                (double)currVel.x(), (double)currVel.y(), (double)currVel.z());
+        }
+        prevTargetVel = currVel;
     }
 
     if (m_keyStates[irr::KEY_KEY_Q] ||m_keyStates[irr::KEY_ESCAPE]) {
         m_quit = true;
         /* Stop network engine */
         m_netEngine->gracefulStop();
+    }
+}
+
+void DodgeballEngine::handleFieldEvents() {
+    /* go through all queued field events */
+    while (m_netEngine->eventSize() > 0) {
+        NetProtocol::FieldEvent *fieldEvent = 
+            m_netEngine->releaseLatestFieldEvent();
+        /* and apply event to physics engine */
+
+        switch (fieldEvent->type()) {
+            case NetProtocol::FieldEvent::SPAWN_BALL:
+            {
+                NetProtocol::SpawnBall *sball = fieldEvent->release_spawn_ball();
+                /* fire dodgeball */
+                DodgeballNode *ball = addDodgeball(
+                    btVector3(
+                        sball->position().x(),
+                        sball->position().y(),
+                        sball->position().z()
+                    ));
+                ball->throwBall(btVector3(
+                        sball->impulse().x(),
+                        sball->impulse().y(),
+                        sball->impulse().z()
+                    ));
+                free(sball);
+            }
+                break;
+            case NetProtocol::FieldEvent::PLAYER_EVENT:
+            {
+                NetProtocol::PlayerEvent *pevent = 
+                    fieldEvent->release_player_event();
+                /* Find the corresponding player and
+                 * apply the event to it. */
+                for (unsigned int i = 0; i < m_players.size(); i++) {
+                    if (m_players[i]->getPlayerID() == pevent->id()) {
+                        m_players[i]->setTargetVelocity(
+                            pevent->targetvelocity().x(),
+                            pevent->targetvelocity().y(),
+                            pevent->targetvelocity().z());
+                    }
+                }
+                free(pevent);
+            }
+            default:
+                break;
+        }
+        /* delete field event because we own the the field
+         * event.
+         */
+        free(fieldEvent);
     }
 }
 

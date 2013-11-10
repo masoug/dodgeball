@@ -6,6 +6,7 @@
 #define NETWORKING_H_
 
 #include <string>
+#include <queue>
 
 #include <enet/enet.h>
 #include <Thread>
@@ -22,7 +23,8 @@
 /* Protocol error codes */
 const std::string NET_ERROR_CODES[] = {
     "All player slots are filled.",
-    "A player already has that name."
+    "A player already has that name.",
+    "Game has already started."
 };
 
 /* Convenience methods */
@@ -45,6 +47,10 @@ class NetBase : public OpenThreads::Thread, public StateMachineBase {
         
         /* getters and setters */
         NetProtocol::GameState getGameState();
+        
+        /* event queue handler */
+        NetProtocol::FieldEvent* releaseLatestFieldEvent();
+        unsigned int eventSize(); // number of events in queue
 
     protected:
         bool m_run;
@@ -54,6 +60,8 @@ class NetBase : public OpenThreads::Thread, public StateMachineBase {
         NetProtocol::GameState *m_gameState;
         OpenThreads::Mutex  m_dataLock;
         OpenThreads::Mutex  m_hostLock;
+        std::queue<NetProtocol::FieldEvent*> m_fieldEvents;
+        OpenThreads::Mutex  m_fieldEventLock;
 };
 
 class DodgeballServer : public NetBase {
@@ -66,11 +74,14 @@ class DodgeballServer : public NetBase {
         
         /* handlers */
         void hdlPlayerRequest(
-            const NetProtocol::PlayerRequest &playerRequest);
-        void hdlPlayerAction(
-            const NetProtocol::PlayerAction &playerAction);
+            NetProtocol::PlayerRequest *playerRequest);
+        void hdlFieldEvent(
+            NetProtocol::FieldEvent *fevent);
         
         virtual ~DodgeballServer();
+
+    protected:
+        bool m_gameStarted;
 };
 
 class DodgeballClient : public NetBase {
@@ -85,8 +96,16 @@ class DodgeballClient : public NetBase {
         virtual void onDisconnect();
         virtual void onReceive();
         void gracefulStop();
-        void sendPlayerAction(
-            const NetProtocol::PlayerAction &paction);
+        void sendPlayerEvent(
+            unsigned int playerID,
+            double vel_x, double vel_y, double vel_z);
+        void sendSpawnBall(
+            double pos_x, double pos_y, double pos_z,
+            double imp_x, double imp_y, double imp_z);
+
+        /* handlers */
+        void hdlFieldEvent(
+            NetProtocol::FieldEvent *fevent);
 
         /* yielding calls */
         bool waitForConnection(unsigned int timeout_ms);
@@ -95,7 +114,7 @@ class DodgeballClient : public NetBase {
         
         /* getter/setter functions */
         int getPlayerID();
-
+        
     protected:
         bool m_connected;
         int m_playerID;

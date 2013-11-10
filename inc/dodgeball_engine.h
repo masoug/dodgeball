@@ -51,6 +51,7 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
 
         /* network systems */
         NetBase     *m_netEngine = NULL;
+        void handleFieldEvents();
 
         /* window dimensions */
         unsigned int    m_windowWidth;

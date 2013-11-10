@@ -10,7 +10,7 @@ OBJS	:= 	$(SRCS:.cpp=.o)
 OBJS	:=	$(patsubst %, $(OBJ_DIR)/%, $(OBJS))
 
 INC		:= 	-I$(INC_DIR) -I/usr/include/bullet -I/usr/include/irrlicht -I/usr/include/google -I/usr/include/OpenThreads
-CCFLAGS	:= 	-Wall $(INC)
+CCFLAGS	:= 	-Wall -g $(INC)
 LDFLAGS	:= 	
 LIBS	:= 	-lIrrlicht -lBulletDynamics -lBulletCollision -lLinearMath -lenet -lprotobuf -lOpenThreads
 

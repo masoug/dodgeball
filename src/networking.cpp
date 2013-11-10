@@ -71,9 +71,10 @@ void NetBase::sendError(ENetPeer *peer, unsigned int errCode) {
 }
 
 void NetBase::sendPacket(
-    NetProtocol::NetPacket &packet, ENetPeer *peer, unsigned int channel) {
+    NetProtocol::NetPacket &packet, ENetPeer *peer, unsigned int channel)
+{
     unsigned int pktSize = packet.ByteSize();
-    char buffer[pktSize];
+    uint8_t buffer[pktSize];
     packet.SerializeToArray(&buffer, pktSize);
 
     ENetPacket *enetPkt = enet_packet_create(
@@ -83,7 +84,24 @@ void NetBase::sendPacket(
 
 NetProtocol::GameState NetBase::getGameState() {
     SLOCK(m_dataLock)
+    if (!m_gameState)
+        return NetProtocol::GameState();
+    /* QUESTION: is this the same?
+     * return *m_gameState;
+     */
     return NetProtocol::GameState(*m_gameState);
+}
+
+NetProtocol::FieldEvent* NetBase::releaseLatestFieldEvent() {
+    SLOCK(m_fieldEventLock)
+    NetProtocol::FieldEvent* fe = m_fieldEvents.front();
+    m_fieldEvents.pop();
+    return fe;
+}
+
+unsigned int NetBase::eventSize() {
+    SLOCK(m_fieldEventLock)
+    return m_fieldEvents.size();
 }
 
 NetBase::~NetBase() {
@@ -95,7 +113,9 @@ NetBase::~NetBase() {
  * DODGEBALL SERVER
  */
 
-DodgeballServer::DodgeballServer(unsigned short port) {
+DodgeballServer::DodgeballServer(unsigned short port) :
+    m_gameStarted(false)
+{
     /* Set address */
     m_address.host = ENET_HOST_ANY;
     m_address.port = port;
@@ -132,11 +152,10 @@ void DodgeballServer::onReceive() {
 
     switch (netPacket.type()) {
         case NetProtocol::NetPacket::PLAYER_REQUEST:
-            hdlPlayerRequest(netPacket.player_request());
+            hdlPlayerRequest(netPacket.release_player_request());
             break;
-        case NetProtocol::NetPacket::PLAYER_ACTION:
-            enet_host_broadcast(m_enetHost, 0, m_event.packet);
-            hdlPlayerAction(netPacket.player_action());
+        case NetProtocol::NetPacket::FIELD_EVENT:
+            hdlFieldEvent(netPacket.release_field_event());
         default:
             break;
     }
@@ -156,13 +175,14 @@ void DodgeballServer::sendGameState() {
     packet.set_allocated_game_state(snapshot);
 
     int pktSize = packet.ByteSize();
-    char buffer[pktSize];
+    uint8_t buffer[pktSize];
     packet.SerializeToArray(&buffer, pktSize);
     m_dataLock.unlock(); // free datalock
     ENetPacket *enetPkt = enet_packet_create(
         &buffer, pktSize, ENET_PACKET_FLAG_RELIABLE);
     SLOCK(m_hostLock);
     enet_host_broadcast(m_enetHost, 0, enetPkt);
+    m_gameStarted = true;
 }
 
 DodgeballServer::~DodgeballServer() {
@@ -170,11 +190,16 @@ DodgeballServer::~DodgeballServer() {
 }
 
 void DodgeballServer::hdlPlayerRequest(
-    const NetProtocol::PlayerRequest &playerRequest) {
+    NetProtocol::PlayerRequest *playerRequest) {
     std::cout << "Player request: " << 
-        playerRequest.DebugString() << std::endl;
+        playerRequest->DebugString() << std::endl;
 
     /* construct a reponse */
+    /* game already started? */
+    if (m_gameStarted) {
+        sendError(m_event.peer, 2);
+        return;
+    }
     /* already six players? */
     SLOCK(m_dataLock)
     if (m_gameState->player_state_size() >= 6) {
@@ -184,7 +209,7 @@ void DodgeballServer::hdlPlayerRequest(
     /* Check for duplicate names */
     for (int i = 0; i < m_gameState->player_state_size(); i++) {
         if (m_gameState->player_state(i).name() == 
-            playerRequest.name())
+            playerRequest->name())
         {
             sendError(m_event.peer, 1);
             return;
@@ -194,7 +219,7 @@ void DodgeballServer::hdlPlayerRequest(
     /* authorize new player */
     /* Add new player state to game state */
     NetProtocol::PlayerState *newPlayer = m_gameState->add_player_state();
-    newPlayer->set_name(playerRequest.name());
+    newPlayer->set_name(playerRequest->name());
     newPlayer->set_possesion(3);
     newPlayer->set_allocated_targetvelocity(NewVector3(0.0, 0.0, 0.0));
     
@@ -236,13 +261,33 @@ void DodgeballServer::hdlPlayerRequest(
         << newPlayer->DebugString() << "\n\n" << std::endl;
 }
 
-void DodgeballServer::hdlPlayerAction(
-    const NetProtocol::PlayerAction &playerAction)
+void DodgeballServer::hdlFieldEvent(
+    NetProtocol::FieldEvent *fevent)
 {
-    /* apply to my game state */
-    /* the packet has already been broadcasted
-     * to everyone else.
+    std::cout << fevent->DebugString() << std::endl;
+    /* broadcast field event to everyone else
+     * Maybe a more efficient method to do this?
      */
+    NetProtocol::NetPacket packet;
+    packet.set_type(NetProtocol::NetPacket::FIELD_EVENT);
+    packet.set_allocated_field_event(new NetProtocol::FieldEvent(*fevent));
+
+    int size = packet.ByteSize();
+    uint8_t buffer[size];
+    packet.SerializeToArray(&buffer, size);
+    ENetPacket *epacket = enet_packet_create(
+        &buffer, size, ENET_PACKET_FLAG_RELIABLE);
+    enet_host_broadcast(m_enetHost, 0, epacket);
+
+    /* push event to event queue for the physics engine
+     * to pick up on the render thread.
+     */
+    SLOCK(m_fieldEventLock)
+    if (m_fieldEvents.size() >= 1000) {
+        std::cerr << "EVENT QUEUE OVERFLOW!!! WTF!?!!?!?!?" << std::endl;
+        return;
+    }
+    m_fieldEvents.push(fevent);
 }
 
 /*
@@ -379,13 +424,56 @@ void DodgeballClient::gracefulStop() {
     m_server = NULL;
 }
 
-void DodgeballClient::sendPlayerAction(const NetProtocol::PlayerAction &paction) {
-    NetProtocol::PlayerAction *ptrAction = new NetProtocol::PlayerAction(paction);
+void DodgeballClient::sendPlayerEvent(
+    unsigned int playerID,
+    double vel_x, double vel_y, double vel_z)
+{
+    NetProtocol::PlayerEvent *ptrAction = new NetProtocol::PlayerEvent;
+    ptrAction->set_id(playerID);
+    ptrAction->set_allocated_targetvelocity(NewVector3(vel_x, vel_y, vel_z));
+    NetProtocol::FieldEvent *fevent = new NetProtocol::FieldEvent;
+    fevent->set_type(NetProtocol::FieldEvent::PLAYER_EVENT);
+    fevent->set_allocated_player_event(ptrAction);
 
     NetProtocol::NetPacket packet;
-    packet.set_type(NetProtocol::NetPacket::PLAYER_ACTION);
-    packet.set_allocated_player_action(ptrAction);
+    packet.set_type(NetProtocol::NetPacket::FIELD_EVENT);
+    packet.set_allocated_field_event(fevent);
     sendPacket(packet, m_server, 0);
+}
+
+void DodgeballClient::sendSpawnBall(
+            double pos_x, double pos_y, double pos_z,
+            double imp_x, double imp_y, double imp_z)
+{
+    NetProtocol::SpawnBall *sball = new NetProtocol::SpawnBall;
+    sball->set_id(0);
+    sball->set_allocated_impulse(NewVector3(imp_x, imp_y, imp_z));
+    sball->set_allocated_position(NewVector3(pos_x, pos_y, pos_z));
+
+    NetProtocol::FieldEvent *fevent = new NetProtocol::FieldEvent;
+    fevent->set_type(NetProtocol::FieldEvent::SPAWN_BALL);
+    fevent->set_allocated_spawn_ball(sball);
+
+    NetProtocol::NetPacket packet;
+    packet.set_type(NetProtocol::NetPacket::FIELD_EVENT);
+    packet.set_allocated_field_event(fevent);
+    sendPacket(packet, m_server, 0);
+}
+
+void DodgeballClient::hdlFieldEvent(
+    NetProtocol::FieldEvent *fevent)
+{
+    /* apply to my physics simulation */
+
+    /* push event to event queue for the physics engine
+     * to pick up on the render thread.
+     */
+    SLOCK(m_fieldEventLock)
+    if (m_fieldEvents.size() >= 1000) {
+        std::cerr << "EVENT QUEUE OVERFLOW!!! WTF!?!!?!?!?" << std::endl;
+        return;
+    }
+    m_fieldEvents.push(fevent);
 }
 
 bool DodgeballClient::waitForInitialState() {
@@ -444,9 +532,9 @@ bool DodgeballClient::waitForConfirmation(unsigned int timeout_ms) {
     return true;
 }
 
-
 int DodgeballClient::getPlayerID() {
     SLOCK(m_dataLock)
     return m_playerID;
 }
+
 

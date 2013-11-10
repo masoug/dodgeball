@@ -26,7 +26,7 @@ class DynamicObject : public StateMachineBase {
         virtual ~DynamicObject();
 
         virtual void applyTransform();
-                //irr::scene::ISceneNode* getSceneNode() const;
+            //irr::scene::ISceneNode* getSceneNode() const;
         btRigidBody* getRigidBody() const;
 
     protected:
@@ -80,20 +80,22 @@ class AvatarNode : public DynamicObject {
             btDiscreteDynamicsWorld *world,
             btVector3 initPos,
             TeamType team, std::string fileName,
-            int playerID);
+            unsigned int playerID);
         virtual ~AvatarNode();
         
         virtual void boop(); // hit by ball
-        void setTargetVelocity(btVector3 vel);
+        void setTargetVelocity(double x, double y, double z);
         void setLateral(double lat);
         void setForward(double forward);
         void stop();
         virtual void applyTransform();
         virtual void applyControlLoop();
-        int getPlayerID() const;
+        unsigned int getPlayerID() const;
+        btVector3 getTargetVel() const;
+        btVector3 getPosition() const;
 
     protected:
-        int m_playerID;
+        unsigned int m_playerID;
         irr::scene::IAnimatedMesh  *m_animatedMesh = NULL;
         TeamType                    m_teamType;
         btVector3                   m_targetVel;

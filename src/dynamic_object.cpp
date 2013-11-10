@@ -147,7 +147,7 @@ AvatarNode::AvatarNode(
     btDiscreteDynamicsWorld *world,
     btVector3 initPos,
     TeamType team,
-    std::string fileName, int playerID) :
+    std::string fileName, unsigned int playerID) :
     m_playerID(playerID), m_targetVel(0.0, 0.0, 0.0)
 {
     m_teamType = team;
@@ -222,8 +222,8 @@ void AvatarNode::boop() {
     setState(PLAYER_OUT);
 }
 
-void AvatarNode::setTargetVelocity(btVector3 vel) {
-    m_targetVel = vel;
+void AvatarNode::setTargetVelocity(double x, double y, double z) {
+    m_targetVel = btVector3(x, y, z);
 }
 
 void AvatarNode::setLateral(double lat) {
@@ -271,8 +271,16 @@ void AvatarNode::applyControlLoop() {
     //    << output.getZ() << std::endl;
 }
 
-int AvatarNode::getPlayerID() const {
+unsigned int AvatarNode::getPlayerID() const {
     return m_playerID;
+}
+
+btVector3 AvatarNode::getTargetVel() const {
+    return m_targetVel;
+}
+
+btVector3 AvatarNode::getPosition() const {
+    return m_rigidBody->getCenterOfMassPosition();
 }
 
 AvatarNode::~AvatarNode() {
@@ -280,6 +288,10 @@ AvatarNode::~AvatarNode() {
     std::cout << "DROP PLAYA" << std::endl;
     m_animatedMesh->drop();
 }
+
+/*
+ * CAMERA AVATAR
+ */
 
 CameraAvatar::CameraAvatar(
     irr::IrrlichtDevice *device,
@@ -318,15 +330,15 @@ void CameraAvatar::applyTransform() {
     /* Check if the player is out of bounds!
      * if a player crosses the center line, then his/her team loses a point.
      */
-    if (m_teamType == RED) {
-        /* Check if my z position is greater than zero. */
-        if (pos.getZ() > 0.0)
-            std::cout << "CROSSED CENTER LINE!!!" << std::endl;
-    } else if (m_teamType == BLUE) {
-        /* check if my z position is less than 0.0 */
-        if (pos.getZ() < 0.0)
-            std::cout << "CROSSED CENTER LINE!!!" << std::endl;
-    }
+    //if (m_teamType == RED) {
+    //    /* Check if my z position is greater than zero. */
+    //    if (pos.getZ() > 0.0)
+    //        std::cout << "CROSSED CENTER LINE!!!" << std::endl;
+    //} else if (m_teamType == BLUE) {
+    //    /* check if my z position is less than 0.0 */
+    //    if (pos.getZ() < 0.0)
+    //        std::cout << "CROSSED CENTER LINE!!!" << std::endl;
+    //}
     
     //Bullet deactivates bodies that have zero velocity
     m_rigidBody->activate();
