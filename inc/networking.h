@@ -67,10 +67,14 @@ class NetBase : public OpenThreads::Thread, public StateMachineBase {
 class DodgeballServer : public NetBase {
     public:
         DodgeballServer(unsigned short port);
+        virtual ~DodgeballServer();
         virtual void onConnect();
         virtual void onReceive();
         virtual void onDisconnect();
         void sendGameState();
+        void broadcastToEveryoneElse(
+            ENetPeer *except, NetProtocol::NetPacket &packet,
+            unsigned int channel);
         
         /* handlers */
         void hdlPlayerRequest(
@@ -78,8 +82,6 @@ class DodgeballServer : public NetBase {
         void hdlFieldEvent(
             NetProtocol::FieldEvent *fevent);
         
-        virtual ~DodgeballServer();
-
     protected:
         bool m_gameStarted;
 };

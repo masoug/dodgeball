@@ -134,6 +134,10 @@ DodgeballServer::DodgeballServer(unsigned short port) :
     start();
 }
 
+DodgeballServer::~DodgeballServer() {
+    /* dtor */
+}
+
 void DodgeballServer::onConnect() {
     printf("Hello there %x:%u!\n",
         m_event.peer->address.host,
@@ -168,25 +172,25 @@ void DodgeballServer::onDisconnect() {
 
 void DodgeballServer::sendGameState() {
     /* Serialize game state */
-    m_dataLock.lock(); // serialize access to gamestate
+    SLOCK(m_dataLock)
     NetProtocol::GameState *snapshot = new NetProtocol::GameState(*m_gameState);
     NetProtocol::NetPacket packet;
     packet.set_type(NetProtocol::NetPacket::GAME_STATE);
     packet.set_allocated_game_state(snapshot);
 
-    int pktSize = packet.ByteSize();
-    uint8_t buffer[pktSize];
-    packet.SerializeToArray(&buffer, pktSize);
-    m_dataLock.unlock(); // free datalock
-    ENetPacket *enetPkt = enet_packet_create(
-        &buffer, pktSize, ENET_PACKET_FLAG_RELIABLE);
-    SLOCK(m_hostLock);
-    enet_host_broadcast(m_enetHost, 0, enetPkt);
+    broadcastToEveryoneElse(NULL, packet, 0);
     m_gameStarted = true;
 }
 
-DodgeballServer::~DodgeballServer() {
-    /* dtor */
+void DodgeballServer::broadcastToEveryoneElse(
+    ENetPeer *except, NetProtocol::NetPacket &packet, unsigned int channel)
+{
+    /* broadcasts the packet to everyone except `except`.
+     * if except is null, the packet is broadcast to everyone */
+    for (unsigned int i = 0; i < m_enetHost->peerCount; i++) {
+        if (except != &m_enetHost->peers[i])
+            sendPacket(packet, &m_enetHost->peers[i], channel);
+    }
 }
 
 void DodgeballServer::hdlPlayerRequest(
@@ -272,13 +276,7 @@ void DodgeballServer::hdlFieldEvent(
     packet.set_type(NetProtocol::NetPacket::FIELD_EVENT);
     packet.set_allocated_field_event(new NetProtocol::FieldEvent(*fevent));
 
-    int size = packet.ByteSize();
-    uint8_t buffer[size];
-    packet.SerializeToArray(&buffer, size);
-    ENetPacket *epacket = enet_packet_create(
-        &buffer, size, ENET_PACKET_FLAG_RELIABLE);
-    enet_host_broadcast(m_enetHost, 0, epacket);
-
+    broadcastToEveryoneElse(m_event.peer, packet, 0); 
     /* push event to event queue for the physics engine
      * to pick up on the render thread.
      */
@@ -393,6 +391,8 @@ void DodgeballClient::onReceive() {
             m_errorPacket = response.release_error();
         }
             break;
+        case NetProtocol::NetPacket::FIELD_EVENT:
+            hdlFieldEvent(response.release_field_event());
         default:
             break;
     }
@@ -463,6 +463,7 @@ void DodgeballClient::sendSpawnBall(
 void DodgeballClient::hdlFieldEvent(
     NetProtocol::FieldEvent *fevent)
 {
+    std::cout << fevent->DebugString() << std::endl;
     /* apply to my physics simulation */
 
     /* push event to event queue for the physics engine
