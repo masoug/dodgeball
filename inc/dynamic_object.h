@@ -41,13 +41,18 @@ class DodgeballNode : public DynamicObject {
         DodgeballNode(
             irr::IrrlichtDevice *device,
             btDiscreteDynamicsWorld *world,
-            btVector3 initPos);
+            btVector3 initPos, unsigned int ballID);
         virtual ~DodgeballNode();
+
+        unsigned int getBallID() const;
 
         virtual void hitFloor();
         virtual void hitPlayer();
 
         void throwBall(btVector3 impulse);
+    
+    protected:
+        unsigned int m_ballID;
 };
 
 class WallNode : public DynamicObject {
@@ -96,6 +101,7 @@ class AvatarNode : public DynamicObject {
 
     protected:
         unsigned int m_playerID;
+        unsigned int m_possesion;
         irr::scene::IAnimatedMesh  *m_animatedMesh = NULL;
         TeamType                    m_teamType;
         btVector3                   m_targetVel;
@@ -108,7 +114,7 @@ class CameraAvatar : public AvatarNode {
             btDiscreteDynamicsWorld *world,
             irr::scene::ICameraSceneNode *camera,
             btVector3 initPos,
-            TeamType team, int playerID);
+            TeamType team, unsigned int playerID);
         virtual ~CameraAvatar();
         virtual void applyTransform();
 };

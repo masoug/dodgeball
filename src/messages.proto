@@ -25,10 +25,18 @@ message PlayerState {
     required uint32 team_type = 7;
 }
 
+message BallState {
+    required uint32 id = 1;
+    required Vector3 position = 2;
+    required Vector3 velocity = 3;
+    required bool isActive = 4;
+}
+
 message GameState {
     repeated PlayerState player_state = 1;
     required uint32 redPoints = 2;
     required uint32 bluePoints = 3;
+    repeated BallState ball_state = 4;
 }
 /************************/
 

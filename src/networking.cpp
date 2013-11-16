@@ -442,11 +442,12 @@ void DodgeballClient::sendPlayerEvent(
 }
 
 void DodgeballClient::sendSpawnBall(
-            double pos_x, double pos_y, double pos_z,
-            double imp_x, double imp_y, double imp_z)
+    unsigned int ballID,
+    double pos_x, double pos_y, double pos_z,
+    double imp_x, double imp_y, double imp_z)
 {
     NetProtocol::SpawnBall *sball = new NetProtocol::SpawnBall;
-    sball->set_id(0);
+    sball->set_id(ballID);
     sball->set_allocated_impulse(NewVector3(imp_x, imp_y, imp_z));
     sball->set_allocated_position(NewVector3(pos_x, pos_y, pos_z));
 

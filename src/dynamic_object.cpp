@@ -44,11 +44,15 @@ btRigidBody* DynamicObject::getRigidBody() const {
     return m_rigidBody;
 }
 
+/*
+ * DODGEBALL NODE
+ */
+
 DodgeballNode::DodgeballNode(
     irr::IrrlichtDevice *device,
     btDiscreteDynamicsWorld *world,
-    btVector3 initPos) :
-    DynamicObject()
+    btVector3 initPos, unsigned int ballID) :
+    DynamicObject(), m_ballID(ballID)
 {
     if (!device) {
         setState(FATAL_STATE);
@@ -83,6 +87,10 @@ DodgeballNode::~DodgeballNode() {
     /* dtor */
 }
 
+unsigned int DodgeballNode::getBallID() const {
+    return m_ballID;
+}
+
 void DodgeballNode::hitFloor() {
     if (getState() == DGDBL_ACTIVE)
         std::cout << "(BALL): Hit floor, inactive!" << std::endl;
@@ -99,6 +107,10 @@ void DodgeballNode::throwBall(btVector3 impulse) {
     m_rigidBody->applyCentralImpulse(impulse);
     setState(DGDBL_ACTIVE);
 }
+
+/*
+ * WALL NODE
+ */
 
 WallNode::WallNode(
     irr::IrrlichtDevice *device,
@@ -142,13 +154,17 @@ WallNode::~WallNode() {
     /* dtor */
 }
 
+/*
+ * AVATAR NODE
+ */
+
 AvatarNode::AvatarNode(
     irr::IrrlichtDevice *device,
     btDiscreteDynamicsWorld *world,
     btVector3 initPos,
     TeamType team,
     std::string fileName, unsigned int playerID) :
-    m_playerID(playerID), m_targetVel(0.0, 0.0, 0.0)
+    m_playerID(playerID), m_possesion(0), m_targetVel(0.0, 0.0, 0.0)
 {
     m_teamType = team;
 
@@ -298,7 +314,7 @@ CameraAvatar::CameraAvatar(
     btDiscreteDynamicsWorld *world,
     irr::scene::ICameraSceneNode *camera,
     btVector3 initPos,
-    TeamType team, int playerID) :
+    TeamType team, unsigned int playerID) :
     AvatarNode(device, world, initPos, team, "NULL", playerID)
 {
     m_sceneNode = camera;

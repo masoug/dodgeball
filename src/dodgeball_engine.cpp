@@ -5,6 +5,8 @@
 #include <iostream>
 #include <math.h>
 #include <unistd.h>
+#include <cstdlib>
+#include <time.h>
 
 #include "dodgeball_engine.h"
 
@@ -36,6 +38,9 @@ DodgeballEngine::DodgeballEngine(
     m_quit(false), m_serverMode(serverMode),
     m_windowWidth(width), m_windowHeight(height)
 {
+    /* initialize random number generator */
+    srand(time(NULL));
+
     /* Initialize the keycodes */
     for (int i = 0; i < irr::KEY_KEY_CODES_COUNT; i++)
         m_keyStates[i] = false;
@@ -93,8 +98,8 @@ DodgeballEngine::DodgeballEngine(
     setState(INIT_STATE);
 }
 
-DodgeballNode* DodgeballEngine::addDodgeball(btVector3 pos) {
-    DodgeballNode *ball = new DodgeballNode(m_device, m_dynamicsWorld, pos);
+DodgeballNode* DodgeballEngine::addDodgeball(btVector3 pos, unsigned int ballID) {
+    DodgeballNode *ball = new DodgeballNode(m_device, m_dynamicsWorld, pos, ballID);
     m_dodgeballs.push_back(ball);
     return ball;
 }
@@ -115,13 +120,15 @@ void DodgeballEngine::fireDodgeball() {
     imp *= 8.0; // applying an impulse simulates throwing a ball 
 
     /* send ball spawn signal */
+    unsigned int newBallID = rand(); /* generate (practically) unique ball id number */
     ((DodgeballClient*)m_netEngine)->sendSpawnBall(
+        newBallID,
         ballPos.x(), ballPos.y(), ballPos.z(),
         imp.X, imp.Y, imp.Z);
     
     /* Create ball and throw it.
      * we add the ball at the target because we don't want it to collide with myself. */
-    DodgeballNode *ball = addDodgeball(ballPos);
+    DodgeballNode *ball = addDodgeball(ballPos, newBallID);
     ball->throwBall(btVector3(imp.X, imp.Y, imp.Z));
 }
 
@@ -430,7 +437,7 @@ void DodgeballEngine::handleFieldEvents() {
                         sball->position().x(),
                         sball->position().y(),
                         sball->position().z()
-                    ));
+                    ), sball->id());
                 ball->throwBall(btVector3(
                         sball->impulse().x(),
                         sball->impulse().y(),

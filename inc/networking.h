@@ -102,6 +102,7 @@ class DodgeballClient : public NetBase {
             unsigned int playerID,
             double vel_x, double vel_y, double vel_z);
         void sendSpawnBall(
+            unsigned int ballID,
             double pos_x, double pos_y, double pos_z,
             double imp_x, double imp_y, double imp_z);
 
