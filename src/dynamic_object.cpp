@@ -6,7 +6,9 @@
 #define FREE(ptr) if (ptr) { delete ptr; }
 
 
-DynamicObject::DynamicObject() {
+DynamicObject::DynamicObject(unsigned int id) : 
+    m_objectID(id)
+{
     setState(INIT_STATE);
 }
 
@@ -44,6 +46,22 @@ btRigidBody* DynamicObject::getRigidBody() const {
     return m_rigidBody;
 }
 
+unsigned int DynamicObject::getID() const {
+    return m_objectID;
+}
+
+void DynamicObject::nudge(double x, double y, double z) {
+    /* nudges the object towards given position */
+    /* TODO: if the impulse is too large, consider just changing the 
+     * object's coordinates directly */
+    btVector3 target(x, y, z);
+    btVector3 current = m_rigidBody->getCenterOfMassPosition();
+    btVector3 push = target-current;
+    push.setY(0.0);
+    m_rigidBody->activate();
+    m_rigidBody->applyCentralImpulse(push*1000);
+}
+
 /*
  * DODGEBALL NODE
  */
@@ -52,7 +70,7 @@ DodgeballNode::DodgeballNode(
     irr::IrrlichtDevice *device,
     btDiscreteDynamicsWorld *world,
     btVector3 initPos, unsigned int ballID) :
-    DynamicObject(), m_ballID(ballID)
+    DynamicObject(ballID)
 {
     if (!device) {
         setState(FATAL_STATE);
@@ -87,10 +105,6 @@ DodgeballNode::~DodgeballNode() {
     /* dtor */
 }
 
-unsigned int DodgeballNode::getBallID() const {
-    return m_ballID;
-}
-
 void DodgeballNode::hitFloor() {
     if (getState() == DGDBL_ACTIVE)
         std::cout << "(BALL): Hit floor, inactive!" << std::endl;
@@ -117,7 +131,7 @@ WallNode::WallNode(
     btDiscreteDynamicsWorld *world,
     btVector3 initPos,
     irr::core::vector3df scale) :
-    DynamicObject()
+    DynamicObject(0)
 {
     if (!device) {
         setState(FATAL_STATE);
@@ -163,8 +177,8 @@ AvatarNode::AvatarNode(
     btDiscreteDynamicsWorld *world,
     btVector3 initPos,
     TeamType team,
-    std::string fileName, unsigned int playerID) :
-    m_playerID(playerID), m_possesion(0), m_targetVel(0.0, 0.0, 0.0)
+    std::string fileName, unsigned int playerID, unsigned int possession) :
+    DynamicObject(playerID), m_possession(possession), m_targetVel(0.0, 0.0, 0.0)
 {
     m_teamType = team;
 
@@ -287,16 +301,26 @@ void AvatarNode::applyControlLoop() {
     //    << output.getZ() << std::endl;
 }
 
-unsigned int AvatarNode::getPlayerID() const {
-    return m_playerID;
-}
-
 btVector3 AvatarNode::getTargetVel() const {
     return m_targetVel;
 }
 
 btVector3 AvatarNode::getPosition() const {
     return m_rigidBody->getCenterOfMassPosition();
+}
+
+unsigned int AvatarNode::getPossession() const {
+    return m_possession;
+}
+
+void AvatarNode::incPossession() {
+    if (m_possession < 3)
+        m_possession++;
+}
+
+void AvatarNode::decPossession() {
+    if (m_possession > 0)
+        m_possession--;
 }
 
 AvatarNode::~AvatarNode() {
@@ -314,8 +338,8 @@ CameraAvatar::CameraAvatar(
     btDiscreteDynamicsWorld *world,
     irr::scene::ICameraSceneNode *camera,
     btVector3 initPos,
-    TeamType team, unsigned int playerID) :
-    AvatarNode(device, world, initPos, team, "NULL", playerID)
+    TeamType team, unsigned int playerID, unsigned int possession) :
+    AvatarNode(device, world, initPos, team, "NULL", playerID, possession)
 {
     m_sceneNode = camera;
     

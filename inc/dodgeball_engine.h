@@ -24,6 +24,7 @@ irr::core::vector3df RodriguesRotate(
     irr::core::vector3df input, irr::core::vector3df axis, double rad);
 
 template<typename Type> Type* fromRigidbody(btRigidBody *body, std::vector<Type*> input);
+template<typename Type> Type* objectFromID(unsigned int id, std::vector<Type*> input);
 
 class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
     public:
@@ -52,6 +53,12 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         /* network systems */
         NetBase     *m_netEngine = NULL;
         void handleFieldEvents();
+        void broadcastGameState();
+
+        /* Game state management */
+        unsigned int m_bluePoints;
+        unsigned int m_redPoints;
+        void applyGameState(NetProtocol::GameState state);
 
         /* window dimensions */
         unsigned int    m_windowWidth;
@@ -88,7 +95,6 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         btDiscreteDynamicsWorld             *m_dynamicsWorld    = NULL;
         
         /* Players */
-        void loadPlayers();
         AvatarNode                  *m_thisPlayer = NULL;
         std::vector<AvatarNode*>     m_players;
 

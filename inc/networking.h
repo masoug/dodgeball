@@ -47,13 +47,14 @@ class NetBase : public OpenThreads::Thread, public StateMachineBase {
         
         /* getters and setters */
         NetProtocol::GameState getGameState();
+        bool isStateDirty();
         
         /* event queue handler */
         NetProtocol::FieldEvent* releaseLatestFieldEvent();
         unsigned int eventSize(); // number of events in queue
 
     protected:
-        bool m_run;
+        bool m_run, m_isStateDirty;
         ENetAddress  m_address;
         ENetHost    *m_enetHost;
         ENetEvent    m_event;
@@ -75,6 +76,7 @@ class DodgeballServer : public NetBase {
         void broadcastToEveryoneElse(
             ENetPeer *except, NetProtocol::NetPacket &packet,
             unsigned int channel);
+        void updateGameState(NetProtocol::GameState *state);
         
         /* handlers */
         void hdlPlayerRequest(

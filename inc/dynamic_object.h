@@ -22,14 +22,16 @@
 
 class DynamicObject : public StateMachineBase {
     public:
-        DynamicObject();
+        DynamicObject(unsigned int id);
         virtual ~DynamicObject();
 
         virtual void applyTransform();
-            //irr::scene::ISceneNode* getSceneNode() const;
         btRigidBody* getRigidBody() const;
+        unsigned int getID() const;
+        void nudge(double x, double y, double z);
 
     protected:
+        unsigned int m_objectID;
         irr::scene::ISceneNode  *m_sceneNode        = NULL;
         btRigidBody             *m_rigidBody        = NULL;
         btMotionState           *m_motionState      = NULL;
@@ -44,15 +46,10 @@ class DodgeballNode : public DynamicObject {
             btVector3 initPos, unsigned int ballID);
         virtual ~DodgeballNode();
 
-        unsigned int getBallID() const;
-
         virtual void hitFloor();
         virtual void hitPlayer();
 
         void throwBall(btVector3 impulse);
-    
-    protected:
-        unsigned int m_ballID;
 };
 
 class WallNode : public DynamicObject {
@@ -85,7 +82,7 @@ class AvatarNode : public DynamicObject {
             btDiscreteDynamicsWorld *world,
             btVector3 initPos,
             TeamType team, std::string fileName,
-            unsigned int playerID);
+            unsigned int playerID, unsigned int possession);
         virtual ~AvatarNode();
         
         virtual void boop(); // hit by ball
@@ -95,13 +92,14 @@ class AvatarNode : public DynamicObject {
         void stop();
         virtual void applyTransform();
         virtual void applyControlLoop();
-        unsigned int getPlayerID() const;
         btVector3 getTargetVel() const;
         btVector3 getPosition() const;
+        unsigned int getPossession() const;
+        void incPossession();
+        void decPossession();
 
     protected:
-        unsigned int m_playerID;
-        unsigned int m_possesion;
+        unsigned int m_possession;
         irr::scene::IAnimatedMesh  *m_animatedMesh = NULL;
         TeamType                    m_teamType;
         btVector3                   m_targetVel;
@@ -114,7 +112,7 @@ class CameraAvatar : public AvatarNode {
             btDiscreteDynamicsWorld *world,
             irr::scene::ICameraSceneNode *camera,
             btVector3 initPos,
-            TeamType team, unsigned int playerID);
+            TeamType team, unsigned int playerID, unsigned int possession);
         virtual ~CameraAvatar();
         virtual void applyTransform();
 };

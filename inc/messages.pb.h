@@ -38,6 +38,7 @@ class Vector3;
 class PlayerRequest;
 class PlayerConfirmation;
 class PlayerState;
+class BallState;
 class GameState;
 class PlayerEvent;
 class SpawnBall;
@@ -430,12 +431,12 @@ class PlayerState : public ::google::protobuf::Message {
   inline ::NetProtocol::Vector3* release_position();
   inline void set_allocated_position(::NetProtocol::Vector3* position);
 
-  // required uint32 possesion = 3;
-  inline bool has_possesion() const;
-  inline void clear_possesion();
-  static const int kPossesionFieldNumber = 3;
-  inline ::google::protobuf::uint32 possesion() const;
-  inline void set_possesion(::google::protobuf::uint32 value);
+  // required uint32 possession = 3;
+  inline bool has_possession() const;
+  inline void clear_possession();
+  static const int kPossessionFieldNumber = 3;
+  inline ::google::protobuf::uint32 possession() const;
+  inline void set_possession(::google::protobuf::uint32 value);
 
   // required .NetProtocol.Vector3 targetVelocity = 4;
   inline bool has_targetvelocity() const;
@@ -446,14 +447,14 @@ class PlayerState : public ::google::protobuf::Message {
   inline ::NetProtocol::Vector3* release_targetvelocity();
   inline void set_allocated_targetvelocity(::NetProtocol::Vector3* targetvelocity);
 
-  // required uint32 avatar = 5;
+  // optional uint32 avatar = 5;
   inline bool has_avatar() const;
   inline void clear_avatar();
   static const int kAvatarFieldNumber = 5;
   inline ::google::protobuf::uint32 avatar() const;
   inline void set_avatar(::google::protobuf::uint32 value);
 
-  // required string name = 6;
+  // optional string name = 6;
   inline bool has_name() const;
   inline void clear_name();
   static const int kNameFieldNumber = 6;
@@ -465,7 +466,7 @@ class PlayerState : public ::google::protobuf::Message {
   inline ::std::string* release_name();
   inline void set_allocated_name(::std::string* name);
 
-  // required uint32 team_type = 7;
+  // optional uint32 team_type = 7;
   inline bool has_team_type() const;
   inline void clear_team_type();
   static const int kTeamTypeFieldNumber = 7;
@@ -478,8 +479,8 @@ class PlayerState : public ::google::protobuf::Message {
   inline void clear_has_id();
   inline void set_has_position();
   inline void clear_has_position();
-  inline void set_has_possesion();
-  inline void clear_has_possesion();
+  inline void set_has_possession();
+  inline void clear_has_possession();
   inline void set_has_targetvelocity();
   inline void clear_has_targetvelocity();
   inline void set_has_avatar();
@@ -493,7 +494,7 @@ class PlayerState : public ::google::protobuf::Message {
 
   ::NetProtocol::Vector3* position_;
   ::google::protobuf::uint32 id_;
-  ::google::protobuf::uint32 possesion_;
+  ::google::protobuf::uint32 possession_;
   ::NetProtocol::Vector3* targetvelocity_;
   ::std::string* name_;
   ::google::protobuf::uint32 avatar_;
@@ -508,6 +509,122 @@ class PlayerState : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static PlayerState* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class BallState : public ::google::protobuf::Message {
+ public:
+  BallState();
+  virtual ~BallState();
+
+  BallState(const BallState& from);
+
+  inline BallState& operator=(const BallState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const BallState& default_instance();
+
+  void Swap(BallState* other);
+
+  // implements Message ----------------------------------------------
+
+  BallState* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const BallState& from);
+  void MergeFrom(const BallState& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required uint32 id = 1;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 1;
+  inline ::google::protobuf::uint32 id() const;
+  inline void set_id(::google::protobuf::uint32 value);
+
+  // required .NetProtocol.Vector3 position = 2;
+  inline bool has_position() const;
+  inline void clear_position();
+  static const int kPositionFieldNumber = 2;
+  inline const ::NetProtocol::Vector3& position() const;
+  inline ::NetProtocol::Vector3* mutable_position();
+  inline ::NetProtocol::Vector3* release_position();
+  inline void set_allocated_position(::NetProtocol::Vector3* position);
+
+  // required .NetProtocol.Vector3 velocity = 3;
+  inline bool has_velocity() const;
+  inline void clear_velocity();
+  static const int kVelocityFieldNumber = 3;
+  inline const ::NetProtocol::Vector3& velocity() const;
+  inline ::NetProtocol::Vector3* mutable_velocity();
+  inline ::NetProtocol::Vector3* release_velocity();
+  inline void set_allocated_velocity(::NetProtocol::Vector3* velocity);
+
+  // required bool isActive = 4;
+  inline bool has_isactive() const;
+  inline void clear_isactive();
+  static const int kIsActiveFieldNumber = 4;
+  inline bool isactive() const;
+  inline void set_isactive(bool value);
+
+  // @@protoc_insertion_point(class_scope:NetProtocol.BallState)
+ private:
+  inline void set_has_id();
+  inline void clear_has_id();
+  inline void set_has_position();
+  inline void clear_has_position();
+  inline void set_has_velocity();
+  inline void clear_has_velocity();
+  inline void set_has_isactive();
+  inline void clear_has_isactive();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::NetProtocol::Vector3* position_;
+  ::google::protobuf::uint32 id_;
+  bool isactive_;
+  ::NetProtocol::Vector3* velocity_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_messages_2eproto();
+  friend void protobuf_AssignDesc_messages_2eproto();
+  friend void protobuf_ShutdownFile_messages_2eproto();
+
+  void InitAsDefaultInstance();
+  static BallState* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -591,6 +708,18 @@ class GameState : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 bluepoints() const;
   inline void set_bluepoints(::google::protobuf::uint32 value);
 
+  // repeated .NetProtocol.BallState ball_state = 4;
+  inline int ball_state_size() const;
+  inline void clear_ball_state();
+  static const int kBallStateFieldNumber = 4;
+  inline const ::NetProtocol::BallState& ball_state(int index) const;
+  inline ::NetProtocol::BallState* mutable_ball_state(int index);
+  inline ::NetProtocol::BallState* add_ball_state();
+  inline const ::google::protobuf::RepeatedPtrField< ::NetProtocol::BallState >&
+      ball_state() const;
+  inline ::google::protobuf::RepeatedPtrField< ::NetProtocol::BallState >*
+      mutable_ball_state();
+
   // @@protoc_insertion_point(class_scope:NetProtocol.GameState)
  private:
   inline void set_has_redpoints();
@@ -603,9 +732,10 @@ class GameState : public ::google::protobuf::Message {
   ::google::protobuf::RepeatedPtrField< ::NetProtocol::PlayerState > player_state_;
   ::google::protobuf::uint32 redpoints_;
   ::google::protobuf::uint32 bluepoints_;
+  ::google::protobuf::RepeatedPtrField< ::NetProtocol::BallState > ball_state_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_messages_2eproto();
   friend void protobuf_AssignDesc_messages_2eproto();
@@ -1460,26 +1590,26 @@ inline void PlayerState::set_allocated_position(::NetProtocol::Vector3* position
   }
 }
 
-// required uint32 possesion = 3;
-inline bool PlayerState::has_possesion() const {
+// required uint32 possession = 3;
+inline bool PlayerState::has_possession() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void PlayerState::set_has_possesion() {
+inline void PlayerState::set_has_possession() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void PlayerState::clear_has_possesion() {
+inline void PlayerState::clear_has_possession() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void PlayerState::clear_possesion() {
-  possesion_ = 0u;
-  clear_has_possesion();
+inline void PlayerState::clear_possession() {
+  possession_ = 0u;
+  clear_has_possession();
 }
-inline ::google::protobuf::uint32 PlayerState::possesion() const {
-  return possesion_;
+inline ::google::protobuf::uint32 PlayerState::possession() const {
+  return possession_;
 }
-inline void PlayerState::set_possesion(::google::protobuf::uint32 value) {
-  set_has_possesion();
-  possesion_ = value;
+inline void PlayerState::set_possession(::google::protobuf::uint32 value) {
+  set_has_possession();
+  possession_ = value;
 }
 
 // required .NetProtocol.Vector3 targetVelocity = 4;
@@ -1520,7 +1650,7 @@ inline void PlayerState::set_allocated_targetvelocity(::NetProtocol::Vector3* ta
   }
 }
 
-// required uint32 avatar = 5;
+// optional uint32 avatar = 5;
 inline bool PlayerState::has_avatar() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -1542,7 +1672,7 @@ inline void PlayerState::set_avatar(::google::protobuf::uint32 value) {
   avatar_ = value;
 }
 
-// required string name = 6;
+// optional string name = 6;
 inline bool PlayerState::has_name() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
@@ -1612,7 +1742,7 @@ inline void PlayerState::set_allocated_name(::std::string* name) {
   }
 }
 
-// required uint32 team_type = 7;
+// optional uint32 team_type = 7;
 inline bool PlayerState::has_team_type() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
@@ -1632,6 +1762,130 @@ inline ::google::protobuf::uint32 PlayerState::team_type() const {
 inline void PlayerState::set_team_type(::google::protobuf::uint32 value) {
   set_has_team_type();
   team_type_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// BallState
+
+// required uint32 id = 1;
+inline bool BallState::has_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void BallState::set_has_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void BallState::clear_has_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void BallState::clear_id() {
+  id_ = 0u;
+  clear_has_id();
+}
+inline ::google::protobuf::uint32 BallState::id() const {
+  return id_;
+}
+inline void BallState::set_id(::google::protobuf::uint32 value) {
+  set_has_id();
+  id_ = value;
+}
+
+// required .NetProtocol.Vector3 position = 2;
+inline bool BallState::has_position() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void BallState::set_has_position() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void BallState::clear_has_position() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void BallState::clear_position() {
+  if (position_ != NULL) position_->::NetProtocol::Vector3::Clear();
+  clear_has_position();
+}
+inline const ::NetProtocol::Vector3& BallState::position() const {
+  return position_ != NULL ? *position_ : *default_instance_->position_;
+}
+inline ::NetProtocol::Vector3* BallState::mutable_position() {
+  set_has_position();
+  if (position_ == NULL) position_ = new ::NetProtocol::Vector3;
+  return position_;
+}
+inline ::NetProtocol::Vector3* BallState::release_position() {
+  clear_has_position();
+  ::NetProtocol::Vector3* temp = position_;
+  position_ = NULL;
+  return temp;
+}
+inline void BallState::set_allocated_position(::NetProtocol::Vector3* position) {
+  delete position_;
+  position_ = position;
+  if (position) {
+    set_has_position();
+  } else {
+    clear_has_position();
+  }
+}
+
+// required .NetProtocol.Vector3 velocity = 3;
+inline bool BallState::has_velocity() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void BallState::set_has_velocity() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void BallState::clear_has_velocity() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void BallState::clear_velocity() {
+  if (velocity_ != NULL) velocity_->::NetProtocol::Vector3::Clear();
+  clear_has_velocity();
+}
+inline const ::NetProtocol::Vector3& BallState::velocity() const {
+  return velocity_ != NULL ? *velocity_ : *default_instance_->velocity_;
+}
+inline ::NetProtocol::Vector3* BallState::mutable_velocity() {
+  set_has_velocity();
+  if (velocity_ == NULL) velocity_ = new ::NetProtocol::Vector3;
+  return velocity_;
+}
+inline ::NetProtocol::Vector3* BallState::release_velocity() {
+  clear_has_velocity();
+  ::NetProtocol::Vector3* temp = velocity_;
+  velocity_ = NULL;
+  return temp;
+}
+inline void BallState::set_allocated_velocity(::NetProtocol::Vector3* velocity) {
+  delete velocity_;
+  velocity_ = velocity;
+  if (velocity) {
+    set_has_velocity();
+  } else {
+    clear_has_velocity();
+  }
+}
+
+// required bool isActive = 4;
+inline bool BallState::has_isactive() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void BallState::set_has_isactive() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void BallState::clear_has_isactive() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void BallState::clear_isactive() {
+  isactive_ = false;
+  clear_has_isactive();
+}
+inline bool BallState::isactive() const {
+  return isactive_;
+}
+inline void BallState::set_isactive(bool value) {
+  set_has_isactive();
+  isactive_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -1705,6 +1959,31 @@ inline ::google::protobuf::uint32 GameState::bluepoints() const {
 inline void GameState::set_bluepoints(::google::protobuf::uint32 value) {
   set_has_bluepoints();
   bluepoints_ = value;
+}
+
+// repeated .NetProtocol.BallState ball_state = 4;
+inline int GameState::ball_state_size() const {
+  return ball_state_.size();
+}
+inline void GameState::clear_ball_state() {
+  ball_state_.Clear();
+}
+inline const ::NetProtocol::BallState& GameState::ball_state(int index) const {
+  return ball_state_.Get(index);
+}
+inline ::NetProtocol::BallState* GameState::mutable_ball_state(int index) {
+  return ball_state_.Mutable(index);
+}
+inline ::NetProtocol::BallState* GameState::add_ball_state() {
+  return ball_state_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::NetProtocol::BallState >&
+GameState::ball_state() const {
+  return ball_state_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::NetProtocol::BallState >*
+GameState::mutable_ball_state() {
+  return &ball_state_;
 }
 
 // -------------------------------------------------------------------

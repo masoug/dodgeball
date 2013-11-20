@@ -18,11 +18,11 @@ message PlayerConfirmation {
 message PlayerState {
     required uint32 id = 1;
     required Vector3 position = 2;
-    required uint32 possesion = 3;
+    required uint32 possession = 3;
     required Vector3 targetVelocity = 4;
-    required uint32 avatar = 5;
-    required string name = 6;
-    required uint32 team_type = 7;
+    optional uint32 avatar = 5;
+    optional string name = 6;
+    optional uint32 team_type = 7;
 }
 
 message BallState {

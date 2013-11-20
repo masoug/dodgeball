@@ -12,7 +12,7 @@ NetProtocol::Vector3* NewVector3(double x, double y, double z) {
     return result;
 }
 
-NetBase::NetBase() : m_run(true) {
+NetBase::NetBase() : m_run(true), m_isStateDirty(false) {
     /* stop thred from running */
     if (enet_initialize() != 0) {
         m_run = false;
@@ -89,7 +89,13 @@ NetProtocol::GameState NetBase::getGameState() {
     /* QUESTION: is this the same?
      * return *m_gameState;
      */
+    m_isStateDirty = false;
     return NetProtocol::GameState(*m_gameState);
+}
+
+bool NetBase::isStateDirty() {
+    SLOCK(m_dataLock)
+    return m_isStateDirty;
 }
 
 NetProtocol::FieldEvent* NetBase::releaseLatestFieldEvent() {
@@ -193,6 +199,23 @@ void DodgeballServer::broadcastToEveryoneElse(
     }
 }
 
+void DodgeballServer::updateGameState(NetProtocol::GameState *state) {
+    /* overwrite our own version of the new version */
+    m_dataLock.lock();
+    if (!m_gameState) {
+        m_dataLock.unlock();
+        return;
+    }
+
+    delete m_gameState;
+    m_gameState = state;
+    m_isStateDirty = true;
+    m_dataLock.unlock();
+
+    /* send the game state */
+    sendGameState();
+}
+
 void DodgeballServer::hdlPlayerRequest(
     NetProtocol::PlayerRequest *playerRequest) {
     std::cout << "Player request: " << 
@@ -224,7 +247,7 @@ void DodgeballServer::hdlPlayerRequest(
     /* Add new player state to game state */
     NetProtocol::PlayerState *newPlayer = m_gameState->add_player_state();
     newPlayer->set_name(playerRequest->name());
-    newPlayer->set_possesion(3);
+    newPlayer->set_possession(3);
     newPlayer->set_allocated_targetvelocity(NewVector3(0.0, 0.0, 0.0));
     
     int playerID = m_gameState->player_state_size();
@@ -263,6 +286,7 @@ void DodgeballServer::hdlPlayerRequest(
 
     std::cout << "\n\nCONFIRMED PLAYER "
         << newPlayer->DebugString() << "\n\n" << std::endl;
+    m_isStateDirty = true;
 }
 
 void DodgeballServer::hdlFieldEvent(
@@ -380,7 +404,10 @@ void DodgeballClient::onReceive() {
         case NetProtocol::NetPacket::GAME_STATE:
         {
             SLOCK(m_dataLock)
+            if (m_gameState) // conserve memory
+                free(m_gameState);
             m_gameState = response.release_game_state();
+            m_isStateDirty = true;
             std::cout << "\n\nGAMESTATE:\n"
                 << m_gameState->DebugString() << std::endl;
         }

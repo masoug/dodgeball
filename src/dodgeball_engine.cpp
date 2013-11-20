@@ -25,11 +25,17 @@ template<typename Type> Type* fromRigidbody(
     btRigidBody *body,
     std::vector<Type*> input)
 {
-    for (unsigned int i = 0; i < input.size(); i++) {
-        if (body == input[i]->getRigidBody()) {
+    for (unsigned int i = 0; i < input.size(); i++) 
+        if (body == input[i]->getRigidBody())
             return input[i];
-        }
-    }
+    return NULL;
+}
+
+template<typename Type> Type* objectFromID(unsigned int id, std::vector<Type*> input)
+{
+    for (unsigned int i = 0; i < input.size(); i++)
+        if (id == input[i]->getID())
+            return input[i];
     return NULL;
 }
 
@@ -105,7 +111,7 @@ DodgeballNode* DodgeballEngine::addDodgeball(btVector3 pos, unsigned int ballID)
 }
 
 void DodgeballEngine::fireDodgeball() {
-    if (m_serverMode)
+    if (m_serverMode || m_thisPlayer->getPossession() <= 0)
         return;
 
     /* get camera transform */
@@ -130,6 +136,8 @@ void DodgeballEngine::fireDodgeball() {
      * we add the ball at the target because we don't want it to collide with myself. */
     DodgeballNode *ball = addDodgeball(ballPos, newBallID);
     ball->throwBall(btVector3(imp.X, imp.Y, imp.Z));
+
+    m_thisPlayer->decPossession();
 }
 
 void DodgeballEngine::handleCollisions() {
@@ -180,6 +188,7 @@ void DodgeballEngine::setupScene() {
          */
         std::cout << "Building game state..." << std::endl;
         /* build game state */
+        m_bluePoints = m_redPoints = 100;
     } else {
         /* Client must wait for all other players to join and 
          * for the server to send the game state to everyone
@@ -191,7 +200,8 @@ void DodgeballEngine::setupScene() {
         while (!client->waitForInitialState())
             std::cerr << "Server derped out. Trying again..." << std::endl;
     }
-    loadPlayers();
+    /* Then apply the game state. */
+    applyGameState(m_netEngine->getGameState());
 }
 
 void DodgeballEngine::buildCourt() {
@@ -211,43 +221,60 @@ void DodgeballEngine::buildCourt() {
     m_wWall = new WallNode(
         m_device, m_dynamicsWorld,
         btVector3(-5.0, 2.5, 0.0), irr::core::vector3df(0.01, 5.0, 10.0));
-
 }
 
-void DodgeballEngine::loadPlayers() {
-    /* Create player */
-
-    /* build scene graph based on game state */
+void DodgeballEngine::applyGameState(NetProtocol::GameState state) {
+    /* apply game state to the scene graph and dynamics world */
+    
     unsigned int myID = -1;
     if (!m_serverMode)
         myID = ((DodgeballClient*)m_netEngine)->getPlayerID();
-    NetProtocol::GameState gstate = m_netEngine->getGameState();
-    for (int i = 0; i < gstate.player_state_size(); i++) {
-        NetProtocol::PlayerState player = gstate.player_state(i);
-        
-        if (!m_serverMode && player.id() == myID) {
-            /* this is me! */
-             m_thisPlayer = new CameraAvatar(
-                m_device, m_dynamicsWorld, m_camera,
-                btVector3(
-                    player.position().x(),
-                    player.position().y(),
-                    player.position().z()),
-                (AvatarNode::TeamType)player.team_type(),
-                myID);
-            m_players.push_back(m_thisPlayer);
+
+    /* apply players */
+    for (int i = 0; i < state.player_state_size(); i++) {
+        NetProtocol::PlayerState player = state.player_state(i);
+
+        /* First check if the player exists */
+        AvatarNode *localPlayer = objectFromID<AvatarNode>(player.id(), m_players);
+        if (localPlayer) {
+            /* update the player */
+            localPlayer->nudge(
+                player.position().x(), player.position().y(), player.position().z());
         } else {
-            /* normal player */
-            m_players.push_back(new AvatarNode(
-                m_device, m_dynamicsWorld,
-                btVector3(
-                    player.position().x(),
-                    player.position().y(),
-                    player.position().z()),
-                (AvatarNode::TeamType)player.team_type(),
-                PLAYER_MODEL_PATHS[player.avatar()], player.id()));
+            /* create the player */
+            if (!m_serverMode && player.id() == myID) {
+                /* this is me! */
+                 m_thisPlayer = new CameraAvatar(
+                    m_device, m_dynamicsWorld, m_camera,
+                    btVector3(
+                        player.position().x(),
+                        player.position().y(),
+                        player.position().z()),
+                    (AvatarNode::TeamType)player.team_type(), myID,
+                    player.possession());
+                 m_players.push_back(m_thisPlayer);
+            } else {
+                /* normal player */
+                m_players.push_back(new AvatarNode(
+                    m_device, m_dynamicsWorld,
+                    btVector3(
+                        player.position().x(),
+                        player.position().y(),
+                        player.position().z()),
+                    (AvatarNode::TeamType)player.team_type(),
+                    PLAYER_MODEL_PATHS[player.avatar()], player.id(), player.possession()));
+            }
         }
     }
+    /* TODO: remove all players that don't appear in the server's gamestate
+     * i.e. they disconnected or something... */
+
+    /* apply balls */
+    /* remove all balls that don't appear in the server's gamestate */
+
+    /* update the points */
+    m_bluePoints = state.bluepoints();
+    m_redPoints = state.redpoints();
 }
 
 void DodgeballEngine::clearScene() {
@@ -300,6 +327,7 @@ bool DodgeballEngine::registerUser(std::string username) {
 void DodgeballEngine::run() {
     setState(DGBENG_RUNNING);
     double prevTime = m_timer->getTime();
+    double lastStateBroadcast = m_timer->getTime();
 
     /* TODO: Maybe consider putting this loop at the top main()-level ? */
     /* doing so would enforce the "statefulness" of the engine? Also a
@@ -310,6 +338,8 @@ void DodgeballEngine::run() {
 
         /* handle events from network */
         handleFieldEvents();
+        if (!m_serverMode && m_netEngine->isStateDirty())
+            applyGameState(m_netEngine->getGameState());
 
         /* update physics stuff */
         updatePhysics((m_timer->getTime()-prevTime) * 0.001);
@@ -320,6 +350,20 @@ void DodgeballEngine::run() {
         m_scenemgr->drawAll();
         updateHUD();
         m_driver->endScene();
+
+        /* broadcast game state when necessary */
+        /* send a pulse every one second? this will have to be 
+         * adjusted depending on how things go.
+         */
+        if (m_serverMode && 
+            m_timer->getTime() - lastStateBroadcast > 1000.0)
+        {
+            /* serialize game state and pass it off to the 
+             * server to be broadcast to everyone else
+             */
+            broadcastGameState();
+            lastStateBroadcast = m_timer->getTime();
+        }
     }
 }
 
@@ -350,7 +394,7 @@ void DodgeballEngine::updateHUD() {
             irr::core::rect<irr::s32>(0, 0, 128, 128), 0, irr::video::SColor(255, 255, 255, 255), true);
         
         /* Draw possessions */
-        for (int ballsRemaining = 0; ballsRemaining < 3; ballsRemaining++)
+        for (unsigned int ballsRemaining = 0; ballsRemaining < m_thisPlayer->getPossession(); ballsRemaining++)
             m_driver->draw2DImage(
                 m_driver->getTexture("models/logo-blue.png"),
                 irr::core::position2d<irr::s32>(70*ballsRemaining+20, 20),
@@ -407,7 +451,7 @@ void DodgeballEngine::handleKeyEvents() {
         btVector3 currVel = m_thisPlayer->getTargetVel();
         if (currVel.distance(prevTargetVel) >= 0.5) {
             ((DodgeballClient*)m_netEngine)->sendPlayerEvent(
-                m_thisPlayer->getPlayerID(),
+                m_thisPlayer->getID(),
                 (double)currVel.x(), (double)currVel.y(), (double)currVel.z());
         }
         prevTargetVel = currVel;
@@ -453,7 +497,7 @@ void DodgeballEngine::handleFieldEvents() {
                 /* Find the corresponding player and
                  * apply the event to it. */
                 for (unsigned int i = 0; i < m_players.size(); i++) {
-                    if (m_players[i]->getPlayerID() == pevent->id()) {
+                    if (m_players[i]->getID() == pevent->id()) {
                         m_players[i]->setTargetVelocity(
                             pevent->targetvelocity().x(),
                             pevent->targetvelocity().y(),
@@ -470,6 +514,43 @@ void DodgeballEngine::handleFieldEvents() {
          */
         free(fieldEvent);
     }
+}
+
+void DodgeballEngine::broadcastGameState() {
+    /* go through the players and the ball nodes
+     * and send it to the server */
+
+    /* quick sanity check */
+    if (!m_serverMode)
+        return;
+
+    /* create new game state */
+    NetProtocol::GameState *state = new NetProtocol::GameState;
+
+    /* fill in the fields of the game state */
+    state->set_redpoints(m_bluePoints);
+    state->set_bluepoints(m_redPoints);
+
+    /* populate the players */
+    for (unsigned int i = 0; i < m_players.size(); i++) {
+        NetProtocol::PlayerState *player = state->add_player_state();
+
+        /* set player fields */
+        player->set_id(m_players[i]->getID());
+        btVector3 pos = m_players[i]->getPosition();
+        player->set_allocated_position(NewVector3(pos.x(), pos.y(), pos.z()));
+        player->set_possession(m_players[i]->getPossession());
+        btVector3 tvel = m_players[i]->getTargetVel();
+        player->set_allocated_targetvelocity(NewVector3(tvel.x(), tvel.y(), tvel.z()));
+    }
+
+    /* populate the balls */
+
+    /* transfer the state to the server engine.
+     * NOTE: ownership of the state is transferred
+     * to the server engine.
+     */
+    ((DodgeballServer*)m_netEngine)->updateGameState(state);
 }
 
 void DodgeballEngine::trackCamera(int x, int y) {
