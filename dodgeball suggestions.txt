@@ -1,0 +1,6 @@
+-ball charge-up
+-walls and additional environment elements
+-ball activation/deactivation states (bright/dark red)
+-knock balls out of air deactivates them
+-label the HUD
+-FPS turn around

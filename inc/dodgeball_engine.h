@@ -49,6 +49,7 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         bool m_quit, m_serverMode;
         bool m_keyStates[irr::KEY_KEY_CODES_COUNT];
         void handleKeyEvents();
+        void ballRepossessed(unsigned int ballID, unsigned int playerID);
 
         /* network systems */
         NetBase     *m_netEngine = NULL;
@@ -82,10 +83,10 @@ class DodgeballEngine : public irr::IEventReceiver, public StateMachineBase {
         irr::gui::IGUIEnvironment       *m_guiEnv       = NULL;
 
         /* GUI elements */
-        irr::gui::IGUIWindow        *m_guiConnectWindow     = NULL;
-        irr::gui::IGUIButton        *m_guiConnectButton     = NULL;
-        irr::gui::IGUIEditBox       *m_guiServerAddrField   = NULL;
-        irr::gui::IGUIStaticText    *m_guiStatusText        = NULL;
+        //irr::gui::IGUIWindow        *m_guiConnectWindow     = NULL;
+        //irr::gui::IGUIButton        *m_guiConnectButton     = NULL;
+        //irr::gui::IGUIEditBox       *m_guiServerAddrField   = NULL;
+        //irr::gui::IGUIStaticText    *m_guiStatusText        = NULL;
 
         /* Bullet stuph... */
         btBroadphaseInterface               *m_broadphase       = NULL;

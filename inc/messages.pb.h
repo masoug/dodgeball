@@ -40,6 +40,7 @@ class PlayerConfirmation;
 class PlayerState;
 class BallState;
 class GameState;
+class BallRepossessed;
 class PlayerEvent;
 class SpawnBall;
 class FieldEvent;
@@ -48,11 +49,12 @@ class NetPacket;
 
 enum FieldEvent_EventType {
   FieldEvent_EventType_PLAYER_EVENT = 1,
-  FieldEvent_EventType_SPAWN_BALL = 2
+  FieldEvent_EventType_SPAWN_BALL = 2,
+  FieldEvent_EventType_BALL_REPOSSESSED = 3
 };
 bool FieldEvent_EventType_IsValid(int value);
 const FieldEvent_EventType FieldEvent_EventType_EventType_MIN = FieldEvent_EventType_PLAYER_EVENT;
-const FieldEvent_EventType FieldEvent_EventType_EventType_MAX = FieldEvent_EventType_SPAWN_BALL;
+const FieldEvent_EventType FieldEvent_EventType_EventType_MAX = FieldEvent_EventType_BALL_REPOSSESSED;
 const int FieldEvent_EventType_EventType_ARRAYSIZE = FieldEvent_EventType_EventType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* FieldEvent_EventType_descriptor();
@@ -746,6 +748,98 @@ class GameState : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class BallRepossessed : public ::google::protobuf::Message {
+ public:
+  BallRepossessed();
+  virtual ~BallRepossessed();
+
+  BallRepossessed(const BallRepossessed& from);
+
+  inline BallRepossessed& operator=(const BallRepossessed& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const BallRepossessed& default_instance();
+
+  void Swap(BallRepossessed* other);
+
+  // implements Message ----------------------------------------------
+
+  BallRepossessed* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const BallRepossessed& from);
+  void MergeFrom(const BallRepossessed& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required uint32 ballID = 1;
+  inline bool has_ballid() const;
+  inline void clear_ballid();
+  static const int kBallIDFieldNumber = 1;
+  inline ::google::protobuf::uint32 ballid() const;
+  inline void set_ballid(::google::protobuf::uint32 value);
+
+  // required uint32 playerID = 2;
+  inline bool has_playerid() const;
+  inline void clear_playerid();
+  static const int kPlayerIDFieldNumber = 2;
+  inline ::google::protobuf::uint32 playerid() const;
+  inline void set_playerid(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:NetProtocol.BallRepossessed)
+ private:
+  inline void set_has_ballid();
+  inline void clear_has_ballid();
+  inline void set_has_playerid();
+  inline void clear_has_playerid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 ballid_;
+  ::google::protobuf::uint32 playerid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_messages_2eproto();
+  friend void protobuf_AssignDesc_messages_2eproto();
+  friend void protobuf_ShutdownFile_messages_2eproto();
+
+  void InitAsDefaultInstance();
+  static BallRepossessed* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class PlayerEvent : public ::google::protobuf::Message {
  public:
   PlayerEvent();
@@ -919,6 +1013,13 @@ class SpawnBall : public ::google::protobuf::Message {
   inline ::NetProtocol::Vector3* release_position();
   inline void set_allocated_position(::NetProtocol::Vector3* position);
 
+  // required uint32 fromID = 4;
+  inline bool has_fromid() const;
+  inline void clear_fromid();
+  static const int kFromIDFieldNumber = 4;
+  inline ::google::protobuf::uint32 fromid() const;
+  inline void set_fromid(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:NetProtocol.SpawnBall)
  private:
   inline void set_has_id();
@@ -927,15 +1028,18 @@ class SpawnBall : public ::google::protobuf::Message {
   inline void clear_has_impulse();
   inline void set_has_position();
   inline void clear_has_position();
+  inline void set_has_fromid();
+  inline void clear_has_fromid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::NetProtocol::Vector3* impulse_;
-  ::NetProtocol::Vector3* position_;
   ::google::protobuf::uint32 id_;
+  ::google::protobuf::uint32 fromid_;
+  ::NetProtocol::Vector3* position_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_messages_2eproto();
   friend void protobuf_AssignDesc_messages_2eproto();
@@ -1001,6 +1105,7 @@ class FieldEvent : public ::google::protobuf::Message {
   typedef FieldEvent_EventType EventType;
   static const EventType PLAYER_EVENT = FieldEvent_EventType_PLAYER_EVENT;
   static const EventType SPAWN_BALL = FieldEvent_EventType_SPAWN_BALL;
+  static const EventType BALL_REPOSSESSED = FieldEvent_EventType_BALL_REPOSSESSED;
   static inline bool EventType_IsValid(int value) {
     return FieldEvent_EventType_IsValid(value);
   }
@@ -1049,6 +1154,15 @@ class FieldEvent : public ::google::protobuf::Message {
   inline ::NetProtocol::SpawnBall* release_spawn_ball();
   inline void set_allocated_spawn_ball(::NetProtocol::SpawnBall* spawn_ball);
 
+  // optional .NetProtocol.BallRepossessed ball_repossessed = 4;
+  inline bool has_ball_repossessed() const;
+  inline void clear_ball_repossessed();
+  static const int kBallRepossessedFieldNumber = 4;
+  inline const ::NetProtocol::BallRepossessed& ball_repossessed() const;
+  inline ::NetProtocol::BallRepossessed* mutable_ball_repossessed();
+  inline ::NetProtocol::BallRepossessed* release_ball_repossessed();
+  inline void set_allocated_ball_repossessed(::NetProtocol::BallRepossessed* ball_repossessed);
+
   // @@protoc_insertion_point(class_scope:NetProtocol.FieldEvent)
  private:
   inline void set_has_type();
@@ -1057,15 +1171,18 @@ class FieldEvent : public ::google::protobuf::Message {
   inline void clear_has_player_event();
   inline void set_has_spawn_ball();
   inline void clear_has_spawn_ball();
+  inline void set_has_ball_repossessed();
+  inline void clear_has_ball_repossessed();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::NetProtocol::PlayerEvent* player_event_;
   ::NetProtocol::SpawnBall* spawn_ball_;
+  ::NetProtocol::BallRepossessed* ball_repossessed_;
   int type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_messages_2eproto();
   friend void protobuf_AssignDesc_messages_2eproto();
@@ -1988,6 +2105,54 @@ GameState::mutable_ball_state() {
 
 // -------------------------------------------------------------------
 
+// BallRepossessed
+
+// required uint32 ballID = 1;
+inline bool BallRepossessed::has_ballid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void BallRepossessed::set_has_ballid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void BallRepossessed::clear_has_ballid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void BallRepossessed::clear_ballid() {
+  ballid_ = 0u;
+  clear_has_ballid();
+}
+inline ::google::protobuf::uint32 BallRepossessed::ballid() const {
+  return ballid_;
+}
+inline void BallRepossessed::set_ballid(::google::protobuf::uint32 value) {
+  set_has_ballid();
+  ballid_ = value;
+}
+
+// required uint32 playerID = 2;
+inline bool BallRepossessed::has_playerid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void BallRepossessed::set_has_playerid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void BallRepossessed::clear_has_playerid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void BallRepossessed::clear_playerid() {
+  playerid_ = 0u;
+  clear_has_playerid();
+}
+inline ::google::protobuf::uint32 BallRepossessed::playerid() const {
+  return playerid_;
+}
+inline void BallRepossessed::set_playerid(::google::protobuf::uint32 value) {
+  set_has_playerid();
+  playerid_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // PlayerEvent
 
 // required uint32 id = 1;
@@ -2152,6 +2317,28 @@ inline void SpawnBall::set_allocated_position(::NetProtocol::Vector3* position) 
   }
 }
 
+// required uint32 fromID = 4;
+inline bool SpawnBall::has_fromid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SpawnBall::set_has_fromid() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SpawnBall::clear_has_fromid() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SpawnBall::clear_fromid() {
+  fromid_ = 0u;
+  clear_has_fromid();
+}
+inline ::google::protobuf::uint32 SpawnBall::fromid() const {
+  return fromid_;
+}
+inline void SpawnBall::set_fromid(::google::protobuf::uint32 value) {
+  set_has_fromid();
+  fromid_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // FieldEvent
@@ -2252,6 +2439,44 @@ inline void FieldEvent::set_allocated_spawn_ball(::NetProtocol::SpawnBall* spawn
     set_has_spawn_ball();
   } else {
     clear_has_spawn_ball();
+  }
+}
+
+// optional .NetProtocol.BallRepossessed ball_repossessed = 4;
+inline bool FieldEvent::has_ball_repossessed() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void FieldEvent::set_has_ball_repossessed() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void FieldEvent::clear_has_ball_repossessed() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void FieldEvent::clear_ball_repossessed() {
+  if (ball_repossessed_ != NULL) ball_repossessed_->::NetProtocol::BallRepossessed::Clear();
+  clear_has_ball_repossessed();
+}
+inline const ::NetProtocol::BallRepossessed& FieldEvent::ball_repossessed() const {
+  return ball_repossessed_ != NULL ? *ball_repossessed_ : *default_instance_->ball_repossessed_;
+}
+inline ::NetProtocol::BallRepossessed* FieldEvent::mutable_ball_repossessed() {
+  set_has_ball_repossessed();
+  if (ball_repossessed_ == NULL) ball_repossessed_ = new ::NetProtocol::BallRepossessed;
+  return ball_repossessed_;
+}
+inline ::NetProtocol::BallRepossessed* FieldEvent::release_ball_repossessed() {
+  clear_has_ball_repossessed();
+  ::NetProtocol::BallRepossessed* temp = ball_repossessed_;
+  ball_repossessed_ = NULL;
+  return temp;
+}
+inline void FieldEvent::set_allocated_ball_repossessed(::NetProtocol::BallRepossessed* ball_repossessed) {
+  delete ball_repossessed_;
+  ball_repossessed_ = ball_repossessed;
+  if (ball_repossessed) {
+    set_has_ball_repossessed();
+  } else {
+    clear_has_ball_repossessed();
   }
 }
 

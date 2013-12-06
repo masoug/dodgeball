@@ -184,7 +184,7 @@ void DodgeballServer::sendGameState() {
     packet.set_type(NetProtocol::NetPacket::GAME_STATE);
     packet.set_allocated_game_state(snapshot);
 
-    broadcastToEveryoneElse(NULL, packet, 0);
+    broadcastToEveryoneElse(NULL, packet, 1);
     m_gameStarted = true;
 }
 
@@ -216,6 +216,22 @@ void DodgeballServer::updateGameState(NetProtocol::GameState *state) {
     sendGameState();
 }
 
+void DodgeballServer::broadcastRepossession(unsigned int ballID, unsigned int playerID) {
+    NetProtocol::BallRepossessed *brp = new NetProtocol::BallRepossessed;
+    brp->set_playerid(playerID);
+    brp->set_ballid(ballID);
+
+    NetProtocol::FieldEvent *fevent = new NetProtocol::FieldEvent;
+    fevent->set_type(NetProtocol::FieldEvent::BALL_REPOSSESSED);
+    fevent->set_allocated_ball_repossessed(brp);
+
+    NetProtocol::NetPacket packet;
+    packet.set_type(NetProtocol::NetPacket::FIELD_EVENT);
+    packet.set_allocated_field_event(fevent);
+
+    broadcastToEveryoneElse(NULL, packet, 0);
+}
+
 void DodgeballServer::hdlPlayerRequest(
     NetProtocol::PlayerRequest *playerRequest) {
     std::cout << "Player request: " << 
@@ -229,7 +245,7 @@ void DodgeballServer::hdlPlayerRequest(
     }
     /* already six players? */
     SLOCK(m_dataLock)
-    if (m_gameState->player_state_size() >= 6) {
+    if (m_gameState->player_state_size() >= 3) {
         sendError(m_event.peer, 0);
         return;
     }
@@ -255,16 +271,16 @@ void DodgeballServer::hdlPlayerRequest(
     newPlayer->set_avatar(playerID-1);
 
     /* assign team to player */
-    if (playerID >= 3)
+    if (playerID == 2)
         newPlayer->set_team_type(AvatarNode::RED);
     else
         newPlayer->set_team_type(AvatarNode::BLUE);
     
     /* assign initial position on the court. */
-    if (newPlayer->team_type() == AvatarNode::RED) {
+    if (newPlayer->team_type() == AvatarNode::BLUE) {
         newPlayer->set_allocated_position(
             NewVector3(2.5*((playerID-1)%3) - 2.5, 1.0, 2.5));
-    } else if (newPlayer->team_type() == AvatarNode::BLUE) {
+    } else if (newPlayer->team_type() == AvatarNode::RED) {
         newPlayer->set_allocated_position(
             NewVector3(2.5*((playerID-1)%3) - 2.5, 1.0, -2.5));
     } else {
@@ -408,8 +424,8 @@ void DodgeballClient::onReceive() {
                 free(m_gameState);
             m_gameState = response.release_game_state();
             m_isStateDirty = true;
-            std::cout << "\n\nGAMESTATE:\n"
-                << m_gameState->DebugString() << std::endl;
+            //std::cout << "\n\nGAMESTATE:\n"
+            //    << m_gameState->DebugString() << std::endl;
         }
             break;
         case NetProtocol::NetPacket::ERROR_PKT:
@@ -469,12 +485,13 @@ void DodgeballClient::sendPlayerEvent(
 }
 
 void DodgeballClient::sendSpawnBall(
-    unsigned int ballID,
+    unsigned int ballID, unsigned int playerID,
     double pos_x, double pos_y, double pos_z,
     double imp_x, double imp_y, double imp_z)
 {
     NetProtocol::SpawnBall *sball = new NetProtocol::SpawnBall;
     sball->set_id(ballID);
+    sball->set_fromid(playerID);
     sball->set_allocated_impulse(NewVector3(imp_x, imp_y, imp_z));
     sball->set_allocated_position(NewVector3(pos_x, pos_y, pos_z));
 

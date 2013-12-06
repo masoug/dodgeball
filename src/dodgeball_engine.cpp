@@ -128,7 +128,7 @@ void DodgeballEngine::fireDodgeball() {
     /* send ball spawn signal */
     unsigned int newBallID = rand(); /* generate (practically) unique ball id number */
     ((DodgeballClient*)m_netEngine)->sendSpawnBall(
-        newBallID,
+        newBallID, m_thisPlayer->getID(),
         ballPos.x(), ballPos.y(), ballPos.z(),
         imp.X, imp.Y, imp.Z);
     
@@ -167,9 +167,17 @@ bool DodgeballEngine::checkCollisions(
             //std::cout << "CHECK PLAYER" << std::endl;
             AvatarNode *player = fromRigidbody<AvatarNode>(bodyB, m_players);
             if (player) {
-                if (ball->getState() == DGDBL_ACTIVE)
+                if (ball->isActive()) {
                     player->boop();
-                ball->hitPlayer();
+                    ball->hitPlayer();
+                } else {
+                    /* an inactive ball-player collision is a repossession */
+                    if (m_serverMode && (player->getPossession() < 3)) {
+                        ((DodgeballServer*)m_netEngine)->broadcastRepossession(
+                            ball->getID(), player->getID());
+                        ballRepossessed(ball->getID(), player->getID());
+                    }
+                }
                 return true;
             }
         }
@@ -221,6 +229,10 @@ void DodgeballEngine::buildCourt() {
     m_wWall = new WallNode(
         m_device, m_dynamicsWorld,
         btVector3(-5.0, 2.5, 0.0), irr::core::vector3df(0.01, 5.0, 10.0));
+    m_ceiling = new WallNode(
+        m_device, m_dynamicsWorld,
+        btVector3(0.0, 5.0, 0.0), irr::core::vector3df(10.0, 0.01, 10.0), m_serverMode);
+ 
 }
 
 void DodgeballEngine::applyGameState(NetProtocol::GameState state) {
@@ -239,7 +251,7 @@ void DodgeballEngine::applyGameState(NetProtocol::GameState state) {
         if (localPlayer) {
             /* update the player */
             localPlayer->nudge(
-                player.position().x(), player.position().y(), player.position().z());
+                player.position().x(), player.position().y(), player.position().z(), 1000.0);
         } else {
             /* create the player */
             if (!m_serverMode && player.id() == myID) {
@@ -270,7 +282,23 @@ void DodgeballEngine::applyGameState(NetProtocol::GameState state) {
      * i.e. they disconnected or something... */
 
     /* apply balls */
-    /* remove all balls that don't appear in the server's gamestate */
+    for (int i = 0; i < state.ball_state_size(); i++) {
+        NetProtocol::BallState ball_state = state.ball_state(i);
+
+        DodgeballNode *local_ball = 
+            objectFromID<DodgeballNode>(ball_state.id(), m_dodgeballs);
+        if (local_ball) {
+            /* update existing ball */
+            local_ball->nudge(
+                ball_state.position().x(),
+                ball_state.position().y(),
+                ball_state.position().z(), 1.0);
+
+        } else {
+            /* create ball */
+        }
+    }
+    /* TODO: remove all balls that don't appear in the server's gamestate */
 
     /* update the points */
     m_bluePoints = state.bluepoints();
@@ -356,7 +384,7 @@ void DodgeballEngine::run() {
          * adjusted depending on how things go.
          */
         if (m_serverMode && 
-            m_timer->getTime() - lastStateBroadcast > 1000.0)
+            m_timer->getTime() - lastStateBroadcast >= 125.0)
         {
             /* serialize game state and pass it off to the 
              * server to be broadcast to everyone else
@@ -388,15 +416,21 @@ void DodgeballEngine::updateHUD() {
     if (!m_serverMode) {
         /* Draw crosshairs... */
         irr::core::rect<irr::s32> windowSize = m_driver->getViewPort();
+        std::string crossHairFile = "models/crosshair.png";
+        std::string possFile = "models/logo-blue.png";
+        if (m_thisPlayer->getTeamType() == AvatarNode::RED) {
+            crossHairFile = "models/crosshair-red.png";
+            possFile = "models/logo.png";
+        }
         m_driver->draw2DImage(
-            m_driver->getTexture("models/crosshair.png"),
+            m_driver->getTexture(crossHairFile.c_str()),
             irr::core::position2d<irr::s32>((windowSize.getWidth()/2)-64, (windowSize.getHeight()/2)-64),
             irr::core::rect<irr::s32>(0, 0, 128, 128), 0, irr::video::SColor(255, 255, 255, 255), true);
         
         /* Draw possessions */
         for (unsigned int ballsRemaining = 0; ballsRemaining < m_thisPlayer->getPossession(); ballsRemaining++)
             m_driver->draw2DImage(
-                m_driver->getTexture("models/logo-blue.png"),
+                m_driver->getTexture(possFile.c_str()),
                 irr::core::position2d<irr::s32>(70*ballsRemaining+20, 20),
                 irr::core::rect<irr::s32>(0, 0, 64, 64), 0, irr::video::SColor(255, 255, 255, 255), true);
     }
@@ -430,17 +464,21 @@ bool DodgeballEngine::OnEvent(const irr::SEvent& event) {
 void DodgeballEngine::handleKeyEvents() {
     /* handle them key events */
     if (!m_serverMode) {
-        if (m_keyStates[irr::KEY_KEY_W]) 
-            m_thisPlayer->setForward(-3.0);
+        int invert = 1;
+        if (m_thisPlayer->getTeamType() == AvatarNode::RED)
+            invert = -1;
+
+        if (m_keyStates[irr::KEY_KEY_W])
+            m_thisPlayer->setForward(-invert*3.0);
         else if (m_keyStates[irr::KEY_KEY_S])
-            m_thisPlayer->setForward(3.0);
+            m_thisPlayer->setForward(invert*3.0);
         else
             m_thisPlayer->setForward(0.0);
 
         if (m_keyStates[irr::KEY_KEY_A])
-            m_thisPlayer->setLateral(3.0);
+            m_thisPlayer->setLateral(invert*3.0);
         else if (m_keyStates[irr::KEY_KEY_D])
-            m_thisPlayer->setLateral(-3.0);
+            m_thisPlayer->setLateral(-invert*3.0);
         else
             m_thisPlayer->setLateral(0.0);
 
@@ -462,6 +500,24 @@ void DodgeballEngine::handleKeyEvents() {
         /* Stop network engine */
         m_netEngine->gracefulStop();
     }
+}
+
+void DodgeballEngine::ballRepossessed(unsigned int ballID, unsigned int playerID) {
+    /* remove ball from bullet and scene graph and vector */
+    for (unsigned int i = 0; i < m_dodgeballs.size(); i++) {
+        DodgeballNode *ball = m_dodgeballs[i];
+        if (ball->getID() == ballID) {
+            m_dynamicsWorld->removeCollisionObject((btCollisionObject*)ball->getRigidBody());
+            delete ball;
+            /* remove from vector */
+            m_dodgeballs.erase(m_dodgeballs.begin()+i);
+        }
+    }
+    
+    /* inc possession for player */
+    for (unsigned int i = 0; i < m_players.size(); i++)
+        if (m_players[i]->getID() == playerID)
+            m_players[i]->incPossession();
 }
 
 void DodgeballEngine::handleFieldEvents() {
@@ -487,6 +543,13 @@ void DodgeballEngine::handleFieldEvents() {
                         sball->impulse().y(),
                         sball->impulse().z()
                     ));
+                /* decrement the player's possession */
+                for (unsigned int i = 0; i < m_players.size(); i++) {
+                    if (m_players[i]->getID() == sball->fromid()) {
+                        m_players[i]->decPossession();
+                        break;
+                    }
+                }
                 free(sball);
             }
                 break;
@@ -506,6 +569,17 @@ void DodgeballEngine::handleFieldEvents() {
                 }
                 free(pevent);
             }
+                break;
+            case NetProtocol::FieldEvent::BALL_REPOSSESSED:
+            {
+                NetProtocol::BallRepossessed *brp = 
+                    fieldEvent->release_ball_repossessed();
+                /* remove the ball with the same id from the scene graph
+                 * and increment possession for the player */
+                ballRepossessed(brp->ballid(), brp->playerid());
+                free(brp);
+            }
+                break;
             default:
                 break;
         }
@@ -541,10 +615,22 @@ void DodgeballEngine::broadcastGameState() {
         player->set_allocated_position(NewVector3(pos.x(), pos.y(), pos.z()));
         player->set_possession(m_players[i]->getPossession());
         btVector3 tvel = m_players[i]->getTargetVel();
-        player->set_allocated_targetvelocity(NewVector3(tvel.x(), tvel.y(), tvel.z()));
+        player->set_allocated_targetvelocity(
+            NewVector3(tvel.x(), tvel.y(), tvel.z()));
     }
 
     /* populate the balls */
+    for (unsigned int i = 0; i < m_dodgeballs.size(); i++) {
+        NetProtocol::BallState *ball = state->add_ball_state();
+
+        /* set ball fields */
+        ball->set_id(m_dodgeballs[i]->getID());
+        btVector3 pos = m_dodgeballs[i]->getPosition();
+        ball->set_allocated_position(NewVector3(pos.x(), pos.y(), pos.z()));
+        ball->set_isactive(m_dodgeballs[i]->isActive());
+        ball->set_allocated_velocity(NewVector3(0.0, 0.0, 0.0));
+        /* TODO: implement velocity... */
+    }
 
     /* transfer the state to the server engine.
      * NOTE: ownership of the state is transferred
@@ -565,6 +651,8 @@ void DodgeballEngine::trackCamera(int x, int y) {
     irr::core::vector3df forward(
         -sin(xproportion*M_PI/2.0), 0.0, -cos(xproportion*M_PI/2.0));
     forward = forward.normalize();
+    if (!m_serverMode && (m_thisPlayer->getTeamType() == AvatarNode::RED))
+        forward = -forward;
     irr::core::vector3df right = forward.crossProduct(m_camera->getUpVector());
     irr::core::vector3df target = RodriguesRotate(
         forward, right.normalize(), -yproportion*M_PI/2.0);

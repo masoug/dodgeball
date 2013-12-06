@@ -41,6 +41,11 @@ message GameState {
 /************************/
 
 /***** FIELD EVENTS *****/
+message BallRepossessed {
+    required uint32 ballID = 1;
+    required uint32 playerID = 2;
+}
+
 message PlayerEvent {
     required uint32 id = 1;
     required Vector3 targetVelocity = 2;
@@ -50,17 +55,19 @@ message SpawnBall {
     required uint32 id = 1;
     required Vector3 impulse = 2;
     required Vector3 position = 3;
+    required uint32 fromID = 4;
 }
 
 message FieldEvent {
     enum EventType {
-        PLAYER_EVENT = 1; SPAWN_BALL = 2;
+        PLAYER_EVENT = 1; SPAWN_BALL = 2; BALL_REPOSSESSED = 3;
     }
 
     required EventType type = 1;
 
     optional PlayerEvent player_event = 2;
     optional SpawnBall spawn_ball = 3;
+    optional BallRepossessed ball_repossessed = 4;
 }
 /***********************/
 

@@ -3,7 +3,7 @@
 
 #include "dynamic_object.h"
 
-#define FREE(ptr) if (ptr) { delete ptr; }
+#define FREE(ptr) if(ptr) { delete ptr; }
 
 
 DynamicObject::DynamicObject(unsigned int id) : 
@@ -13,7 +13,7 @@ DynamicObject::DynamicObject(unsigned int id) :
 }
 
 DynamicObject::~DynamicObject() {
-    m_sceneNode->drop();
+    m_sceneNode->remove();
     FREE(m_rigidBody)
     FREE(m_motionState)
     FREE(m_collisionShape)
@@ -50,16 +50,19 @@ unsigned int DynamicObject::getID() const {
     return m_objectID;
 }
 
-void DynamicObject::nudge(double x, double y, double z) {
+void DynamicObject::nudge(double x, double y, double z, double scale) {
     /* nudges the object towards given position */
     /* TODO: if the impulse is too large, consider just changing the 
      * object's coordinates directly */
     btVector3 target(x, y, z);
     btVector3 current = m_rigidBody->getCenterOfMassPosition();
     btVector3 push = target-current;
-    push.setY(0.0);
     m_rigidBody->activate();
-    m_rigidBody->applyCentralImpulse(push*1000);
+    m_rigidBody->applyCentralImpulse(push*scale);
+}
+
+btVector3 DynamicObject::getPosition() const {
+    return m_rigidBody->getCenterOfMassPosition(); 
 }
 
 /*
@@ -90,7 +93,7 @@ DodgeballNode::DodgeballNode(
 
     m_motionState = new btDefaultMotionState(transform);
     m_collisionShape = new btSphereShape(DODGEBALL_RADIUS);
-
+    
     btVector3 locInertia;
     m_collisionShape->calculateLocalInertia(DODGEBALL_MASS, locInertia);
     m_rigidBody = new btRigidBody(
@@ -102,7 +105,6 @@ DodgeballNode::DodgeballNode(
 }
 
 DodgeballNode::~DodgeballNode() {
-    /* dtor */
 }
 
 void DodgeballNode::hitFloor() {
@@ -122,6 +124,10 @@ void DodgeballNode::throwBall(btVector3 impulse) {
     setState(DGDBL_ACTIVE);
 }
 
+bool DodgeballNode::isActive() const {
+    return getState() == DGDBL_ACTIVE;
+}
+
 /*
  * WALL NODE
  */
@@ -130,7 +136,8 @@ WallNode::WallNode(
     irr::IrrlichtDevice *device,
     btDiscreteDynamicsWorld *world,
     btVector3 initPos,
-    irr::core::vector3df scale) :
+    irr::core::vector3df scale,
+    bool invisible) :
     DynamicObject(0)
 {
     if (!device) {
@@ -141,10 +148,13 @@ WallNode::WallNode(
     irr::scene::ISceneManager *smgr = device->getSceneManager();
     irr::video::IVideoDriver *driver = device->getVideoDriver();
     m_sceneNode = smgr->addCubeSceneNode(1.0);
-    m_sceneNode->setScale(scale);
+    if (invisible)
+        m_sceneNode->setScale(irr::core::vector3df(0.0, 0.0, 0.0));
+    else
+        m_sceneNode->setScale(scale);
     m_sceneNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
     m_sceneNode->setMaterialTexture(
-        0, driver->getTexture("test_texture.jpg"));
+        0, driver->getTexture("models/wall.jpg"));
     
     btTransform transform;
     transform.setIdentity();
@@ -202,21 +212,7 @@ AvatarNode::AvatarNode(
     transform.setOrigin(initPos);
     
     m_motionState = new btDefaultMotionState(transform);
-    if (m_sceneNode != NULL) {
-        /* Setting scale; this is tricky... */
-        irr::core::vector3df ext = m_sceneNode->getTransformedBoundingBox().getExtent();
-        //std::cout << ext.X << ", " << ext.Y << ", " << ext.Z << std::endl;
-        //m_sceneNode->setScale(irr::core::vector3df(
-        //    (2.0*HUMAN_RADIUS)/ext.X,
-        //    HUMAN_HEIGHT/ext.Y,
-        //    (2.0*HUMAN_RADIUS)/ext.Z));
-
-        double radius = std::max(ext.X, ext.Z);
-        //m_collisionShape = new btCapsuleShape(radius, ext.Y);
-        m_collisionShape = new btCapsuleShape(radius, ext.Y-(radius/2.0));
-    } else {
-        m_collisionShape = new btCapsuleShape(HUMAN_RADIUS, HUMAN_HEIGHT);
-    }
+    m_collisionShape = new btCapsuleShape(HUMAN_RADIUS, HUMAN_HEIGHT);
 
     /* Generate the rigidbody and local inertia... */
     btVector3 locInertia;
@@ -244,6 +240,10 @@ AvatarNode::AvatarNode(
             irr::core::vector3df(0.0, 180.0, 0.0));
     
     setState(PLAYER_ACTIVE);
+}
+
+unsigned int AvatarNode::getTeamType() const {
+    return m_teamType;
 }
 
 void AvatarNode::boop() {
@@ -303,10 +303,6 @@ void AvatarNode::applyControlLoop() {
 
 btVector3 AvatarNode::getTargetVel() const {
     return m_targetVel;
-}
-
-btVector3 AvatarNode::getPosition() const {
-    return m_rigidBody->getCenterOfMassPosition();
 }
 
 unsigned int AvatarNode::getPossession() const {

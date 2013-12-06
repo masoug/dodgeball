@@ -38,6 +38,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GameState_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GameState_reflection_ = NULL;
+const ::google::protobuf::Descriptor* BallRepossessed_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  BallRepossessed_reflection_ = NULL;
 const ::google::protobuf::Descriptor* PlayerEvent_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   PlayerEvent_reflection_ = NULL;
@@ -169,7 +172,23 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GameState));
-  PlayerEvent_descriptor_ = file->message_type(6);
+  BallRepossessed_descriptor_ = file->message_type(6);
+  static const int BallRepossessed_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BallRepossessed, ballid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BallRepossessed, playerid_),
+  };
+  BallRepossessed_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      BallRepossessed_descriptor_,
+      BallRepossessed::default_instance_,
+      BallRepossessed_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BallRepossessed, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BallRepossessed, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(BallRepossessed));
+  PlayerEvent_descriptor_ = file->message_type(7);
   static const int PlayerEvent_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerEvent, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerEvent, targetvelocity_),
@@ -185,11 +204,12 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PlayerEvent));
-  SpawnBall_descriptor_ = file->message_type(7);
-  static const int SpawnBall_offsets_[3] = {
+  SpawnBall_descriptor_ = file->message_type(8);
+  static const int SpawnBall_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SpawnBall, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SpawnBall, impulse_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SpawnBall, position_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SpawnBall, fromid_),
   };
   SpawnBall_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -202,11 +222,12 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SpawnBall));
-  FieldEvent_descriptor_ = file->message_type(8);
-  static const int FieldEvent_offsets_[3] = {
+  FieldEvent_descriptor_ = file->message_type(9);
+  static const int FieldEvent_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldEvent, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldEvent, player_event_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldEvent, spawn_ball_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldEvent, ball_repossessed_),
   };
   FieldEvent_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -220,7 +241,7 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FieldEvent));
   FieldEvent_EventType_descriptor_ = FieldEvent_descriptor_->enum_type(0);
-  Error_descriptor_ = file->message_type(9);
+  Error_descriptor_ = file->message_type(10);
   static const int Error_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Error, errorcode_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Error, errormsg_),
@@ -236,7 +257,7 @@ void protobuf_AssignDesc_messages_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Error));
-  NetPacket_descriptor_ = file->message_type(10);
+  NetPacket_descriptor_ = file->message_type(11);
   static const int NetPacket_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(NetPacket, vector3_),
@@ -283,6 +304,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GameState_descriptor_, &GameState::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    BallRepossessed_descriptor_, &BallRepossessed::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     PlayerEvent_descriptor_, &PlayerEvent::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     SpawnBall_descriptor_, &SpawnBall::default_instance());
@@ -309,6 +332,8 @@ void protobuf_ShutdownFile_messages_2eproto() {
   delete BallState_reflection_;
   delete GameState::default_instance_;
   delete GameState_reflection_;
+  delete BallRepossessed::default_instance_;
+  delete BallRepossessed_reflection_;
   delete PlayerEvent::default_instance_;
   delete PlayerEvent_reflection_;
   delete SpawnBall::default_instance_;
@@ -342,29 +367,33 @@ void protobuf_AddDesc_messages_2eproto() {
     " \002(\010\"\216\001\n\tGameState\022.\n\014player_state\030\001 \003(\013"
     "2\030.NetProtocol.PlayerState\022\021\n\tredPoints\030"
     "\002 \002(\r\022\022\n\nbluePoints\030\003 \002(\r\022*\n\nball_state\030"
-    "\004 \003(\0132\026.NetProtocol.BallState\"G\n\013PlayerE"
-    "vent\022\n\n\002id\030\001 \002(\r\022,\n\016targetVelocity\030\002 \002(\013"
-    "2\024.NetProtocol.Vector3\"f\n\tSpawnBall\022\n\n\002i"
-    "d\030\001 \002(\r\022%\n\007impulse\030\002 \002(\0132\024.NetProtocol.V"
-    "ector3\022&\n\010position\030\003 \002(\0132\024.NetProtocol.V"
-    "ector3\"\310\001\n\nFieldEvent\022/\n\004type\030\001 \002(\0162!.Ne"
-    "tProtocol.FieldEvent.EventType\022.\n\014player"
-    "_event\030\002 \001(\0132\030.NetProtocol.PlayerEvent\022*"
-    "\n\nspawn_ball\030\003 \001(\0132\026.NetProtocol.SpawnBa"
-    "ll\"-\n\tEventType\022\020\n\014PLAYER_EVENT\020\001\022\016\n\nSPA"
-    "WN_BALL\020\002\",\n\005Error\022\021\n\terrorCode\030\001 \002(\r\022\020\n"
-    "\010errorMsg\030\002 \002(\t\"\276\003\n\tNetPacket\022)\n\004type\030\001 "
-    "\002(\0162\033.NetProtocol.NetPacket.Type\022%\n\007vect"
-    "or3\030\002 \001(\0132\024.NetProtocol.Vector3\0222\n\016playe"
-    "r_request\030\003 \001(\0132\032.NetProtocol.PlayerRequ"
-    "est\022<\n\023player_confirmation\030\004 \001(\0132\037.NetPr"
-    "otocol.PlayerConfirmation\022!\n\005error\030\005 \001(\013"
-    "2\022.NetProtocol.Error\022*\n\ngame_state\030\006 \001(\013"
-    "2\026.NetProtocol.GameState\022,\n\013field_event\030"
-    "\007 \001(\0132\027.NetProtocol.FieldEvent\"p\n\004Type\022\013"
-    "\n\007VECTOR3\020\001\022\022\n\016PLAYER_REQUEST\020\002\022\027\n\023PLAYE"
-    "R_CONFIRMATION\020\003\022\r\n\tERROR_PKT\020\004\022\016\n\nGAME_"
-    "STATE\020\005\022\017\n\013FIELD_EVENT\020\006", 1464);
+    "\004 \003(\0132\026.NetProtocol.BallState\"3\n\017BallRep"
+    "ossessed\022\016\n\006ballID\030\001 \002(\r\022\020\n\010playerID\030\002 \002"
+    "(\r\"G\n\013PlayerEvent\022\n\n\002id\030\001 \002(\r\022,\n\016targetV"
+    "elocity\030\002 \002(\0132\024.NetProtocol.Vector3\"v\n\tS"
+    "pawnBall\022\n\n\002id\030\001 \002(\r\022%\n\007impulse\030\002 \002(\0132\024."
+    "NetProtocol.Vector3\022&\n\010position\030\003 \002(\0132\024."
+    "NetProtocol.Vector3\022\016\n\006fromID\030\004 \002(\r\"\226\002\n\n"
+    "FieldEvent\022/\n\004type\030\001 \002(\0162!.NetProtocol.F"
+    "ieldEvent.EventType\022.\n\014player_event\030\002 \001("
+    "\0132\030.NetProtocol.PlayerEvent\022*\n\nspawn_bal"
+    "l\030\003 \001(\0132\026.NetProtocol.SpawnBall\0226\n\020ball_"
+    "repossessed\030\004 \001(\0132\034.NetProtocol.BallRepo"
+    "ssessed\"C\n\tEventType\022\020\n\014PLAYER_EVENT\020\001\022\016"
+    "\n\nSPAWN_BALL\020\002\022\024\n\020BALL_REPOSSESSED\020\003\",\n\005"
+    "Error\022\021\n\terrorCode\030\001 \002(\r\022\020\n\010errorMsg\030\002 \002"
+    "(\t\"\276\003\n\tNetPacket\022)\n\004type\030\001 \002(\0162\033.NetProt"
+    "ocol.NetPacket.Type\022%\n\007vector3\030\002 \001(\0132\024.N"
+    "etProtocol.Vector3\0222\n\016player_request\030\003 \001"
+    "(\0132\032.NetProtocol.PlayerRequest\022<\n\023player"
+    "_confirmation\030\004 \001(\0132\037.NetProtocol.Player"
+    "Confirmation\022!\n\005error\030\005 \001(\0132\022.NetProtoco"
+    "l.Error\022*\n\ngame_state\030\006 \001(\0132\026.NetProtoco"
+    "l.GameState\022,\n\013field_event\030\007 \001(\0132\027.NetPr"
+    "otocol.FieldEvent\"p\n\004Type\022\013\n\007VECTOR3\020\001\022\022"
+    "\n\016PLAYER_REQUEST\020\002\022\027\n\023PLAYER_CONFIRMATIO"
+    "N\020\003\022\r\n\tERROR_PKT\020\004\022\016\n\nGAME_STATE\020\005\022\017\n\013FI"
+    "ELD_EVENT\020\006", 1611);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages.proto", &protobuf_RegisterTypes);
   Vector3::default_instance_ = new Vector3();
@@ -373,6 +402,7 @@ void protobuf_AddDesc_messages_2eproto() {
   PlayerState::default_instance_ = new PlayerState();
   BallState::default_instance_ = new BallState();
   GameState::default_instance_ = new GameState();
+  BallRepossessed::default_instance_ = new BallRepossessed();
   PlayerEvent::default_instance_ = new PlayerEvent();
   SpawnBall::default_instance_ = new SpawnBall();
   FieldEvent::default_instance_ = new FieldEvent();
@@ -384,6 +414,7 @@ void protobuf_AddDesc_messages_2eproto() {
   PlayerState::default_instance_->InitAsDefaultInstance();
   BallState::default_instance_->InitAsDefaultInstance();
   GameState::default_instance_->InitAsDefaultInstance();
+  BallRepossessed::default_instance_->InitAsDefaultInstance();
   PlayerEvent::default_instance_->InitAsDefaultInstance();
   SpawnBall::default_instance_->InitAsDefaultInstance();
   FieldEvent::default_instance_->InitAsDefaultInstance();
@@ -2281,6 +2312,255 @@ void GameState::Swap(GameState* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int BallRepossessed::kBallIDFieldNumber;
+const int BallRepossessed::kPlayerIDFieldNumber;
+#endif  // !_MSC_VER
+
+BallRepossessed::BallRepossessed()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void BallRepossessed::InitAsDefaultInstance() {
+}
+
+BallRepossessed::BallRepossessed(const BallRepossessed& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void BallRepossessed::SharedCtor() {
+  _cached_size_ = 0;
+  ballid_ = 0u;
+  playerid_ = 0u;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+BallRepossessed::~BallRepossessed() {
+  SharedDtor();
+}
+
+void BallRepossessed::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void BallRepossessed::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* BallRepossessed::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return BallRepossessed_descriptor_;
+}
+
+const BallRepossessed& BallRepossessed::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_messages_2eproto();
+  return *default_instance_;
+}
+
+BallRepossessed* BallRepossessed::default_instance_ = NULL;
+
+BallRepossessed* BallRepossessed::New() const {
+  return new BallRepossessed;
+}
+
+void BallRepossessed::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    ballid_ = 0u;
+    playerid_ = 0u;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool BallRepossessed::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required uint32 ballID = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &ballid_)));
+          set_has_ballid();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_playerID;
+        break;
+      }
+
+      // required uint32 playerID = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_playerID:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &playerid_)));
+          set_has_playerid();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void BallRepossessed::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required uint32 ballID = 1;
+  if (has_ballid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->ballid(), output);
+  }
+
+  // required uint32 playerID = 2;
+  if (has_playerid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->playerid(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* BallRepossessed::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // required uint32 ballID = 1;
+  if (has_ballid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->ballid(), target);
+  }
+
+  // required uint32 playerID = 2;
+  if (has_playerid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->playerid(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int BallRepossessed::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required uint32 ballID = 1;
+    if (has_ballid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->ballid());
+    }
+
+    // required uint32 playerID = 2;
+    if (has_playerid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->playerid());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void BallRepossessed::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const BallRepossessed* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const BallRepossessed*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void BallRepossessed::MergeFrom(const BallRepossessed& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_ballid()) {
+      set_ballid(from.ballid());
+    }
+    if (from.has_playerid()) {
+      set_playerid(from.playerid());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void BallRepossessed::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void BallRepossessed::CopyFrom(const BallRepossessed& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool BallRepossessed::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+
+  return true;
+}
+
+void BallRepossessed::Swap(BallRepossessed* other) {
+  if (other != this) {
+    std::swap(ballid_, other->ballid_);
+    std::swap(playerid_, other->playerid_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata BallRepossessed::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = BallRepossessed_descriptor_;
+  metadata.reflection = BallRepossessed_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
 const int PlayerEvent::kIdFieldNumber;
 const int PlayerEvent::kTargetVelocityFieldNumber;
 #endif  // !_MSC_VER
@@ -2541,6 +2821,7 @@ void PlayerEvent::Swap(PlayerEvent* other) {
 const int SpawnBall::kIdFieldNumber;
 const int SpawnBall::kImpulseFieldNumber;
 const int SpawnBall::kPositionFieldNumber;
+const int SpawnBall::kFromIDFieldNumber;
 #endif  // !_MSC_VER
 
 SpawnBall::SpawnBall()
@@ -2564,6 +2845,7 @@ void SpawnBall::SharedCtor() {
   id_ = 0u;
   impulse_ = NULL;
   position_ = NULL;
+  fromid_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -2608,6 +2890,7 @@ void SpawnBall::Clear() {
     if (has_position()) {
       if (position_ != NULL) position_->::NetProtocol::Vector3::Clear();
     }
+    fromid_ = 0u;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -2658,6 +2941,22 @@ bool SpawnBall::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(32)) goto parse_fromID;
+        break;
+      }
+
+      // required uint32 fromID = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_fromID:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &fromid_)));
+          set_has_fromid();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -2697,6 +2996,11 @@ void SpawnBall::SerializeWithCachedSizes(
       3, this->position(), output);
   }
 
+  // required uint32 fromID = 4;
+  if (has_fromid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(4, this->fromid(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -2722,6 +3026,11 @@ void SpawnBall::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         3, this->position(), target);
+  }
+
+  // required uint32 fromID = 4;
+  if (has_fromid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(4, this->fromid(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -2754,6 +3063,13 @@ int SpawnBall::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->position());
+    }
+
+    // required uint32 fromID = 4;
+    if (has_fromid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->fromid());
     }
 
   }
@@ -2792,6 +3108,9 @@ void SpawnBall::MergeFrom(const SpawnBall& from) {
     if (from.has_position()) {
       mutable_position()->::NetProtocol::Vector3::MergeFrom(from.position());
     }
+    if (from.has_fromid()) {
+      set_fromid(from.fromid());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -2809,7 +3128,7 @@ void SpawnBall::CopyFrom(const SpawnBall& from) {
 }
 
 bool SpawnBall::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
+  if ((_has_bits_[0] & 0x0000000f) != 0x0000000f) return false;
 
   if (has_impulse()) {
     if (!this->impulse().IsInitialized()) return false;
@@ -2825,6 +3144,7 @@ void SpawnBall::Swap(SpawnBall* other) {
     std::swap(id_, other->id_);
     std::swap(impulse_, other->impulse_);
     std::swap(position_, other->position_);
+    std::swap(fromid_, other->fromid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -2850,6 +3170,7 @@ bool FieldEvent_EventType_IsValid(int value) {
   switch(value) {
     case 1:
     case 2:
+    case 3:
       return true;
     default:
       return false;
@@ -2859,6 +3180,7 @@ bool FieldEvent_EventType_IsValid(int value) {
 #ifndef _MSC_VER
 const FieldEvent_EventType FieldEvent::PLAYER_EVENT;
 const FieldEvent_EventType FieldEvent::SPAWN_BALL;
+const FieldEvent_EventType FieldEvent::BALL_REPOSSESSED;
 const FieldEvent_EventType FieldEvent::EventType_MIN;
 const FieldEvent_EventType FieldEvent::EventType_MAX;
 const int FieldEvent::EventType_ARRAYSIZE;
@@ -2867,6 +3189,7 @@ const int FieldEvent::EventType_ARRAYSIZE;
 const int FieldEvent::kTypeFieldNumber;
 const int FieldEvent::kPlayerEventFieldNumber;
 const int FieldEvent::kSpawnBallFieldNumber;
+const int FieldEvent::kBallRepossessedFieldNumber;
 #endif  // !_MSC_VER
 
 FieldEvent::FieldEvent()
@@ -2877,6 +3200,7 @@ FieldEvent::FieldEvent()
 void FieldEvent::InitAsDefaultInstance() {
   player_event_ = const_cast< ::NetProtocol::PlayerEvent*>(&::NetProtocol::PlayerEvent::default_instance());
   spawn_ball_ = const_cast< ::NetProtocol::SpawnBall*>(&::NetProtocol::SpawnBall::default_instance());
+  ball_repossessed_ = const_cast< ::NetProtocol::BallRepossessed*>(&::NetProtocol::BallRepossessed::default_instance());
 }
 
 FieldEvent::FieldEvent(const FieldEvent& from)
@@ -2890,6 +3214,7 @@ void FieldEvent::SharedCtor() {
   type_ = 1;
   player_event_ = NULL;
   spawn_ball_ = NULL;
+  ball_repossessed_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -2901,6 +3226,7 @@ void FieldEvent::SharedDtor() {
   if (this != default_instance_) {
     delete player_event_;
     delete spawn_ball_;
+    delete ball_repossessed_;
   }
 }
 
@@ -2933,6 +3259,9 @@ void FieldEvent::Clear() {
     }
     if (has_spawn_ball()) {
       if (spawn_ball_ != NULL) spawn_ball_->::NetProtocol::SpawnBall::Clear();
+    }
+    if (has_ball_repossessed()) {
+      if (ball_repossessed_ != NULL) ball_repossessed_->::NetProtocol::BallRepossessed::Clear();
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -2989,6 +3318,20 @@ bool FieldEvent::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(34)) goto parse_ball_repossessed;
+        break;
+      }
+
+      // optional .NetProtocol.BallRepossessed ball_repossessed = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_ball_repossessed:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_ball_repossessed()));
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -3029,6 +3372,12 @@ void FieldEvent::SerializeWithCachedSizes(
       3, this->spawn_ball(), output);
   }
 
+  // optional .NetProtocol.BallRepossessed ball_repossessed = 4;
+  if (has_ball_repossessed()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      4, this->ball_repossessed(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -3055,6 +3404,13 @@ void FieldEvent::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         3, this->spawn_ball(), target);
+  }
+
+  // optional .NetProtocol.BallRepossessed ball_repossessed = 4;
+  if (has_ball_repossessed()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        4, this->ball_repossessed(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -3086,6 +3442,13 @@ int FieldEvent::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->spawn_ball());
+    }
+
+    // optional .NetProtocol.BallRepossessed ball_repossessed = 4;
+    if (has_ball_repossessed()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->ball_repossessed());
     }
 
   }
@@ -3124,6 +3487,9 @@ void FieldEvent::MergeFrom(const FieldEvent& from) {
     if (from.has_spawn_ball()) {
       mutable_spawn_ball()->::NetProtocol::SpawnBall::MergeFrom(from.spawn_ball());
     }
+    if (from.has_ball_repossessed()) {
+      mutable_ball_repossessed()->::NetProtocol::BallRepossessed::MergeFrom(from.ball_repossessed());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -3149,6 +3515,9 @@ bool FieldEvent::IsInitialized() const {
   if (has_spawn_ball()) {
     if (!this->spawn_ball().IsInitialized()) return false;
   }
+  if (has_ball_repossessed()) {
+    if (!this->ball_repossessed().IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -3157,6 +3526,7 @@ void FieldEvent::Swap(FieldEvent* other) {
     std::swap(type_, other->type_);
     std::swap(player_event_, other->player_event_);
     std::swap(spawn_ball_, other->spawn_ball_);
+    std::swap(ball_repossessed_, other->ball_repossessed_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

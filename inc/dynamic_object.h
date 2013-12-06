@@ -28,7 +28,8 @@ class DynamicObject : public StateMachineBase {
         virtual void applyTransform();
         btRigidBody* getRigidBody() const;
         unsigned int getID() const;
-        void nudge(double x, double y, double z);
+        void nudge(double x, double y, double z, double scale);
+        btVector3 getPosition() const;
 
     protected:
         unsigned int m_objectID;
@@ -48,6 +49,7 @@ class DodgeballNode : public DynamicObject {
 
         virtual void hitFloor();
         virtual void hitPlayer();
+        bool isActive() const;
 
         void throwBall(btVector3 impulse);
 };
@@ -58,7 +60,8 @@ class WallNode : public DynamicObject {
             irr::IrrlichtDevice *device,
             btDiscreteDynamicsWorld *world,
             btVector3 initPos,
-            irr::core::vector3df scale);
+            irr::core::vector3df scale,
+            bool invisible=false);
         virtual ~WallNode();
 };
 
@@ -85,6 +88,7 @@ class AvatarNode : public DynamicObject {
             unsigned int playerID, unsigned int possession);
         virtual ~AvatarNode();
         
+        unsigned int getTeamType() const;
         virtual void boop(); // hit by ball
         void setTargetVelocity(double x, double y, double z);
         void setLateral(double lat);
@@ -93,7 +97,6 @@ class AvatarNode : public DynamicObject {
         virtual void applyTransform();
         virtual void applyControlLoop();
         btVector3 getTargetVel() const;
-        btVector3 getPosition() const;
         unsigned int getPossession() const;
         void incPossession();
         void decPossession();
@@ -112,7 +115,8 @@ class CameraAvatar : public AvatarNode {
             btDiscreteDynamicsWorld *world,
             irr::scene::ICameraSceneNode *camera,
             btVector3 initPos,
-            TeamType team, unsigned int playerID, unsigned int possession);
+            TeamType team, unsigned int playerID,
+            unsigned int possession);
         virtual ~CameraAvatar();
         virtual void applyTransform();
 };
